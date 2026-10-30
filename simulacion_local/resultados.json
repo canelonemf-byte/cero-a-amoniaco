@@ -1,0 +1,1539 @@
+{
+  "meta": {
+    "proyecto": "cero_a",
+    "version": "v3",
+    "version_anterior": "v2/ (sin personal/terreno/permisos/conexion/tanque; sin rfnbo)",
+    "nivel_evidencia": "e2_validacion_concepto",
+    "fecha": "2026-10-20",
+    "zona_horaria": "Europe/Madrid",
+    "autoria": "Lázaro López Paz, El Prat de Llobregat, Barcelona, España; con asistencia de inteligencia artificial",
+    "emplazamiento": {
+      "nombre": "el_prat_de_llobregat_barcelona",
+      "lat": 41.3,
+      "lon": 2.08
+    },
+    "scripts": [
+      "datos_cero_a.py",
+      "simulacion_cero_a_v3.py",
+      "construir_v3.py"
+    ],
+    "datos_experimentales": [],
+    "n_monte_carlo_diseno_fijo": 300,
+    "n_monte_carlo_reoptimizado": 64,
+    "metodo_mc_reoptimizado": "cada muestra triangular re-optimiza el diseno (evolucion diferencial popsize 8, maxiter 35; 8 nucleos en paralelo)",
+    "anos": {
+      "meteo": [
+        2022,
+        2023
+      ],
+      "precios_omie": [
+        2024,
+        2025
+      ]
+    },
+    "moneda": "EUR 2024 (USD->EUR 1/1.0824)",
+    "tiempo_ejecucion_s": 223.5,
+    "advertencia": "resultados de modelo con supuestos de literatura; no validados experimentalmente; no constituye asesoramiento juridico sobre rfnbo"
+  },
+  "objetivo": "piloto de amoniaco verde 50 kg/h nh3 en el prat: lcoa completo con rangos y cumplimiento rfnbo por escenario de suministro",
+  "datos_clave": {
+    "supuestos_tecnicos": [
+      {
+        "parametro": "e_electrolizador_kwh_kg_h2",
+        "base": 55.0,
+        "rango": [
+          50.0,
+          65.0
+        ],
+        "unidad": "kWh/kg H2",
+        "fuente": "IRENA (2020) KPI PEM sistema 50-83; estado del arte 52-56"
+      },
+      {
+        "parametro": "carga_min_electrolizador",
+        "base": 0.05,
+        "rango": [
+          0.05,
+          0.1
+        ],
+        "unidad": "fraccion",
+        "fuente": "IRENA (2020) 5-120 %; OIES EL47 (2022) 0-10 %"
+      },
+      {
+        "parametro": "conversion_global_lazo",
+        "base": 0.98,
+        "rango": [
+          0.97,
+          0.99
+        ],
+        "unidad": "fraccion",
+        "fuente": "Rouwenhorst et al. 2021 via Wang et al. iScience 2022"
+      },
+      {
+        "parametro": "e_lazo_hb_kwh_kg_nh3",
+        "base": 2.0,
+        "rango": [
+          0.64,
+          3.62
+        ],
+        "unidad": "kWh/kg NH3",
+        "fuente": "Rouwenhorst et al. RSER 2019 (3.62 pequena escala; NFUEL ~2); Ikaheimo et al. IJHE 2018 (0.64)"
+      },
+      {
+        "parametro": "e_psa_kwh_nm3_n2",
+        "base": 0.45,
+        "rango": [
+          0.3,
+          0.6
+        ],
+        "unidad": "kWh/Nm3",
+        "fuente": "Messer, ficha PSA 99.9 %"
+      },
+      {
+        "parametro": "rampa_hb_frac_h",
+        "base": 0.2,
+        "rango": [
+          0.1,
+          0.3
+        ],
+        "unidad": "fraccion/h",
+        "fuente": "ICAE 2021 (Australia): HB flexible 20 %/h"
+      },
+      {
+        "parametro": "eficiencia_compresor_h2",
+        "base": 0.6,
+        "rango": [
+          0.5,
+          0.75
+        ],
+        "unidad": "isoterma",
+        "fuente": "supuesto; contraste DOE Record 9013"
+      },
+      {
+        "parametro": "rte_bateria",
+        "base": 0.85,
+        "rango": [
+          0.8,
+          0.9
+        ],
+        "unidad": "fraccion",
+        "fuente": "NREL ATB 2024: 85 % (rango supuesto)"
+      },
+      {
+        "parametro": "h_perdidas_arranque_hb",
+        "base": 6.0,
+        "rango": [
+          2.0,
+          12.0
+        ],
+        "unidad": "h a carga minima sin NH3 por arranque",
+        "fuente": "SUPUESTO sin fuente cuantitativa (calentamiento/estabilizacion); rango amplio"
+      },
+      {
+        "parametro": "min_parada_hb_h",
+        "base": 6.0,
+        "rango": [
+          1.0,
+          24.0
+        ],
+        "unidad": "h",
+        "fuente": "SUPUESTO; Joule 2023 (dynamic operation) usa paradas planificadas >= 3 dias"
+      }
+    ],
+    "supuestos_economicos": [
+      {
+        "parametro": "capex_fv_eur_kwp",
+        "base": 800,
+        "rango": [
+          619.9187,
+          1000
+        ],
+        "unidad": "EUR/kWp",
+        "fuente": "IRENA RPGC 2023: Espana FV utility 671 USD/kW (2023); prima escala piloto = supuesto"
+      },
+      {
+        "parametro": "om_fv_eur_kwp_a",
+        "base": 12,
+        "rango": [
+          9.5159,
+          18
+        ],
+        "unidad": "EUR/kWp/a",
+        "fuente": "IRENA RPGC 2023: O&M FV global 10.3 USD/kW/a; prima piloto = supuesto"
+      },
+      {
+        "parametro": "capex_eol_eur_kw",
+        "base": 1400,
+        "rango": [
+          1071.6925,
+          1800
+        ],
+        "unidad": "EUR/kW",
+        "fuente": "IRENA RPGC 2023: eolica terrestre global 1160 USD/kW; prima Europa/turbina pequena = supuesto"
+      },
+      {
+        "parametro": "om_eol_eur_kw_a",
+        "base": 40,
+        "rango": [
+          30,
+          50
+        ],
+        "unidad": "EUR/kW/a",
+        "fuente": "rango SUPUESTO (orden de magnitud NREL ATB eolica terrestre)"
+      },
+      {
+        "parametro": "capex_pem_eur_kw",
+        "base": 2263.4885,
+        "rango": [
+          1755.3585,
+          3000
+        ],
+        "unidad": "EUR/kW instalado (incl. EPC)",
+        "fuente": "IEA GHR 2024: 2000-2450 USD/kW fuera de China (PEM extremo alto); IEA 2025: 1900-2500; max piloto = supuesto"
+      },
+      {
+        "parametro": "om_pem_frac",
+        "base": 0.03,
+        "rango": [
+          0.02,
+          0.04
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "IEA GHR 2024 Assumptions annex: 3 %"
+      },
+      {
+        "parametro": "vida_stack_h",
+        "base": 50000,
+        "rango": [
+          50000,
+          95000
+        ],
+        "unidad": "h",
+        "fuente": "IEA GHR 2024 annex: 50 000 h (hasta 95 000 h)"
+      },
+      {
+        "parametro": "frac_stack_capex",
+        "base": 0.35,
+        "rango": [
+          0.3,
+          0.45
+        ],
+        "unidad": "fraccion",
+        "fuente": "IRENA (2020) Green H2 cost reduction: stack 30-45 % del coste"
+      },
+      {
+        "parametro": "capex_buffer_eur_kg",
+        "base": 866.58,
+        "rango": [
+          535,
+          1000
+        ],
+        "unidad": "EUR/kg H2 util",
+        "fuente": "Haber-Bosch 2.0, EES 2026, Tabla 2: 26 EUR/kWh (=867 EUR/kg); ENTEC/Fraunhofer 2022: ~535 EUR/kg tanques; max supuesto"
+      },
+      {
+        "parametro": "capex_psa_eur",
+        "base": 183000.0,
+        "rango": [
+          126000.0,
+          222000.0
+        ],
+        "unidad": "EUR (42 kg N2/h)",
+        "fuente": "EES 2026 Tabla 2: ASU 1720 EUR/(kg N2/h) a 20 t/d, escalado exp. 0.6-0.8 (base 0.67, Malmali et al. Processes 2018)"
+      },
+      {
+        "parametro": "capex_hb_eur",
+        "base": 1090000.0,
+        "rango": [
+          750000.0,
+          1900000.0
+        ],
+        "unidad": "EUR (50 kg NH3/h)",
+        "fuente": "EES 2026 Tabla 2: 8600 EUR/(kg NH3/h) a 20 t/d escalado exp 0.6-0.8; max: Malmali et al. 2018 (3 t/d = 3.8 M USD) escalado"
+      },
+      {
+        "parametro": "om_hb_psa_frac",
+        "base": 0.03,
+        "rango": [
+          0.02,
+          0.05
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "Pozo et al. 2022 (3 %); Wang et al. iScience 2022 (5 %)"
+      },
+      {
+        "parametro": "capex_bat_eur_kwh",
+        "base": 400,
+        "rango": [
+          252.2173,
+          485.0333
+        ],
+        "unidad": "EUR/kWh (4 h)",
+        "fuente": "IRENA RPGC 2023: 273 USD/kWh (2023); NREL ATB 2024: 525 USD/kWh (4 h, USD 2022)"
+      },
+      {
+        "parametro": "om_bat_frac",
+        "base": 0.025,
+        "rango": [
+          0.02,
+          0.03
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "NREL ATB 2024 (FOM ~2.5 %); rango supuesto"
+      },
+      {
+        "parametro": "wacc",
+        "base": 0.07,
+        "rango": [
+          0.05,
+          0.1
+        ],
+        "unidad": "real",
+        "fuente": "SUPUESTO: renovables Europa bajo (IRENA Cost of financing 2023) + prima primera planta"
+      },
+      {
+        "parametro": "ppa_fv_eur_mwh",
+        "base": 33.5,
+        "rango": [
+          30.0,
+          40.0
+        ],
+        "unidad": "EUR/MWh",
+        "fuente": "LevelTen PPA Index Espana Q3 2025 P25 solar 33.5; Q4 2025 32.5; ofertas < 30"
+      },
+      {
+        "parametro": "ppa_eol_eur_mwh",
+        "base": 53.0,
+        "rango": [
+          45.0,
+          60.0
+        ],
+        "unidad": "EUR/MWh",
+        "fuente": "LevelTen PPA Index Espana Q3 2025 P25 eolica 53; rango supuesto"
+      },
+      {
+        "parametro": "agua_eur_m3",
+        "base": 2.0,
+        "rango": [
+          1.5,
+          3.0
+        ],
+        "unidad": "EUR/m3",
+        "fuente": "Wang et al. iScience 2022: 2.15 USD/m3 (Toronto); rango supuesto Barcelona"
+      },
+      {
+        "parametro": "personal_fte",
+        "base": 4.0,
+        "rango": [
+          2.0,
+          6.0
+        ],
+        "unidad": "FTE",
+        "fuente": "SUPUESTO del modelo (sin referencia publica para piloto 50 kg/h); rango amplio 2-6"
+      },
+      {
+        "parametro": "coste_fte_eur_a",
+        "base": 45000.0,
+        "rango": [
+          37525.4,
+          60000.0
+        ],
+        "unidad": "EUR/FTE/a",
+        "fuente": "INE ETCL/EACL 2024: coste laboral medio 37 525.40 EUR/trabajador/a (min); base y max = SUPUESTO perfil tecnico/turnos"
+      },
+      {
+        "parametro": "superficie_planta_m2",
+        "base": 3000.0,
+        "rango": [
+          1500.0,
+          5000.0
+        ],
+        "unidad": "m2",
+        "fuente": "SUPUESTO (PEM, HB, PSA, tanque, distancias de seguridad); sin fuente"
+      },
+      {
+        "parametro": "alquiler_eur_m2_mes",
+        "base": 8.5,
+        "rango": [
+          6.54,
+          11.0
+        ],
+        "unidad": "EUR/m2/mes",
+        "fuente": "Anuncios El Prat 8.50-9.23; Zona Franca 11 (2025); media Cataluna 6.54 (BNP Paribas RE Q3 2025); CBRE prime BCN ~7 (Q2 2025). Son rentas de naves: cota alta para suelo"
+      },
+      {
+        "parametro": "ha_por_mwp_fv",
+        "base": 2.0,
+        "rango": [
+          1.3,
+          2.0
+        ],
+        "unidad": "ha/MWp",
+        "fuente": "UNEF/MAPA: ocupacion real 1.3-1.5 ha/MWp; 2 ha/MWp en planificacion"
+      },
+      {
+        "parametro": "frac_permisos_ingenieria",
+        "base": 0.15,
+        "rango": [
+          0.1,
+          0.25
+        ],
+        "unidad": "fraccion CAPEX proceso",
+        "fuente": "NETL QGESS owner's costs hasta ~20 %; EPRI 10 % ingenieria + 15 % contingencia; caso NL 9 %+9 %"
+      },
+      {
+        "parametro": "conexion_km",
+        "base": 0.5,
+        "rango": [
+          0.2,
+          2.0
+        ],
+        "unidad": "km linea MT",
+        "fuente": "SUPUESTO (distancia a red MT en poligono); sin fuente"
+      },
+      {
+        "parametro": "coste_linea_eur_km",
+        "base": 146733.0,
+        "rango": [
+          146733.0,
+          217993.0
+        ],
+        "unidad": "EUR/km",
+        "fuente": "CNMC (2013) valores de referencia linea MT subterranea simple 146 733 / doble 217 993 EUR/km (EUR corrientes 2013, sin actualizar)"
+      },
+      {
+        "parametro": "tanque_usd_t",
+        "base": 3000.0,
+        "rango": [
+          2000.0,
+          4000.0
+        ],
+        "unidad": "USD/t capacidad NH3",
+        "fuente": "Rouwenhorst et al. 2021 (Techno-Economic Challenges of Green Ammonia, cap.) ~3000 USD/t presurizado pequena escala; rango +-33 % SUPUESTO"
+      },
+      {
+        "parametro": "dias_seguridad_tanque",
+        "base": 7.0,
+        "rango": [
+          3.0,
+          14.0
+        ],
+        "unidad": "dias de produccion nominal",
+        "fuente": "SUPUESTO logistico (frecuencia de recogida por cisterna)"
+      }
+    ],
+    "supuestos_escenarios_aparte": [
+      {
+        "parametro": "precio_o2_eur_t",
+        "base": 90.0,
+        "rango": [
+          80.0,
+          100.0
+        ],
+        "unidad": "EUR/t O2",
+        "fuente": "Energiforsk 2023: O2 merchant bulk 80-100 EUR/t (ingreso bruto; sin coste de purificacion/compresion/logistica)"
+      },
+      {
+        "parametro": "intensidad_ayuda_pioneros",
+        "base": 0.4,
+        "rango": [
+          0.4,
+          0.6
+        ],
+        "unidad": "fraccion costes elegibles",
+        "fuente": "Orden TED H2 Pioneros (PERTE ERHA): 40 % gran empresa, 50 % mediana, 60 % pequena; elegible: electrolizador, auxiliares, almacenamiento, compresion. Convocatorias 2022-2023 cerradas"
+      },
+      {
+        "parametro": "prima_h2bank_eur_kg",
+        "base": 0.84,
+        "rango": [
+          0.44,
+          0.85
+        ],
+        "unidad": "EUR/kg H2 RFNBO, 10 a",
+        "fuente": "Hydrogen Bank IF24, adjudicatarios espanoles 0.44/0.84/0.85 EUR/kg; HIPOTETICO: subastas exigen >= 5 MWe (piloto no elegible)"
+      }
+    ],
+    "derechos_conexion_eur_kw": {
+      "valor": 32.7112,
+      "fuente": "derechos de extension 15.718632 + acceso 16.992541 EUR/kW, 1-36 kV, suelo urbanizado (<=250 kW); aplicado a toda la potencia contratada (aprox.)"
+    },
+    "rfnbo_normativa": {
+      "fuentes": [
+        "Reglamento Delegado (UE) 2023/1184 (texto consolidado 10-06-2024, CELEX 02023R1184-20240610)",
+        "Reglamento Delegado (UE) 2023/1185, Anexo (metodologia GEI)",
+        "Directiva (UE) 2018/2001 art. 27(3) y 25(2)",
+        "Eurostat SHARES 2024 (cuota renovable electrica Espana 56.9 % 2023, 59.7 % 2024)"
+      ],
+      "art_3_conexion_directa": "electricidad de instalacion conectada directamente (o en la misma instalacion) cuenta como totalmente renovable si la instalacion renovable entro en servicio <= 36 meses antes que la de RFNBO y, si hay conexion a red, se demuestra con contador inteligente que no se importa electricidad de red para producir el combustible",
+      "art_4_red": "electricidad de red totalmente renovable si: zona de oferta con > 90 % renovable (Espana no), o intensidad < 18 gCO2e/MJ (Espana 54.1, no), o PPA renovable con adicionalidad (art. 5) y correlacion temporal (art. 6) y geografica (art. 7)",
+      "art_5_adicionalidad": "instalacion renovable del PPA en servicio no antes de 36 meses previos a la de RFNBO y sin ayudas de funcionamiento o inversion (salvo excepciones)",
+      "art_6_correlacion_temporal": "hasta 31-12-2029: mismo mes natural; desde 1-1-2030: misma hora (un Estado miembro puede adelantar la horaria a 1-7-2027). Excepcion: hora con precio diario <= 20 EUR/MWh o < 0.36 x precio EUA; almacenamiento nuevo detras del mismo punto de conexion permitido",
+      "art_7_correlacion_geografica": "misma zona de oferta (o interconectada con precio igual/superior, o offshore adyacente). PPA en Espana peninsular: cumple",
+      "art_11_transitorio": "instalaciones RFNBO en servicio antes de 1-1-2028 exentas de art. 5(a)(b) (adicionalidad) hasta 1-1-2038 (no aplica a ampliaciones posteriores)",
+      "gei_2023_1185": "ahorro >= 70 % frente a 94 gCO2e/MJ -> limite 28.2 gCO2e/MJ; electricidad no renovable de red con factor 54.1 gCO2e/MJ (Espana, Anexo); calculo por mes o periodo mas corto",
+      "umbral_excepcion_precio_modelo_eur_mwh": 23.4,
+      "eua_usado_eur_t": 65.0
+    },
+    "escenarios": {
+      "ppa_red_mensual": {
+        "escenario": "ppa_red_mensual",
+        "nombre": "PPA + red (correl. mensual)",
+        "modo_red": 1,
+        "diseno": {
+          "ppa_fv_kw": 1208.255,
+          "ppa_eol_kw": 3666.695,
+          "pem_kw": 537.073,
+          "buffer_h": 14.001,
+          "carga_min_hb": 0.292
+        },
+        "lcoa_eur_t": 3166,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 3017,
+          "p50": 3432,
+          "p95": 3924
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 2960,
+          "p50": 3346,
+          "p95": 3701,
+          "diseno_p5_p95": {
+            "ppa_fv_kw": [
+              1006.7,
+              1346.9
+            ],
+            "ppa_eol_kw": [
+              3275.2,
+              4344.6
+            ],
+            "pem_kw": [
+              511.9,
+              603.2
+            ],
+            "buffer_h": [
+              9.4,
+              26.1
+            ],
+            "carga_min_hb": [
+              0.2,
+              0.4
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 0,
+          "eolica": 0,
+          "pem": 516,
+          "buffer_h2": 30,
+          "psa_hb": 375,
+          "bateria": 0,
+          "tanque_nh3": 12,
+          "conexion_red": 21,
+          "permisos_ingenieria": 92,
+          "personal": 426,
+          "alquiler_terreno": 724,
+          "red_energia_omie": 0,
+          "red_peajes_cargos": 211,
+          "ppa": 1004,
+          "venta_excedentes": -249,
+          "agua": 3
+        },
+        "nh3_t_ano": 422.5,
+        "consumo_kwh_kg_nh3": 12.277,
+        "cf_hb": 0.965,
+        "cf_pem": 0.895,
+        "arranques_hb_ano": 0.5,
+        "import_red_mwh_ano": 0.0,
+        "potencia_contratada_kw": 653,
+        "tanque_nh3_t": 16.0,
+        "seveso": "no",
+        "superficie_m2": 3000,
+        "capex_total_eur": 2737515,
+        "lcoa_precios_2024": 3190,
+        "lcoa_precios_2025": 3136,
+        "rfnbo": {
+          "fraccion_renovable_mensual": 1.0,
+          "fraccion_renovable_horaria": 1.0,
+          "fraccion_renovable_electrolizador_horaria": 1.0,
+          "gei_mensual_gco2e_mj": 0.0,
+          "gei_horaria_gco2e_mj": 0.0,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": true,
+          "cumple_horaria_desde_2030": true,
+          "cumple_horaria_lectura_b": true
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 3036,
+            "p5_p95": [
+              2918,
+              3825
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 3047,
+            "p5_p95": [
+              2902,
+              3780
+            ],
+            "aplicable": true
+          },
+          "h2bank": {
+            "lcoa_base": 3065,
+            "p5_p95": [
+              2956,
+              3885
+            ],
+            "aplicable": true
+          },
+          "todo": {
+            "lcoa_base": 2817,
+            "p5_p95": [
+              2696,
+              3562
+            ],
+            "aplicable": true
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. "
+        },
+        "importancia_spearman": {
+          "superficie_planta_m2": 0.593,
+          "e_electrolizador_kwh_kg_h2": 0.405,
+          "personal_fte": 0.309,
+          "alquiler_eur_m2_mes": 0.242,
+          "e_lazo_hb_kwh_kg_nh3": 0.203,
+          "coste_fte_eur_a": 0.175,
+          "capex_pem_eur_kw": 0.142,
+          "capex_psa_eur": 0.141
+        },
+        "v2_equivalente": {
+          "escenario": "ppa_fv_eol_red",
+          "lcoa": 1849,
+          "p5_p95": [
+            1750,
+            2281
+          ]
+        }
+      },
+      "ppa_rfnbo_horario": {
+        "escenario": "ppa_rfnbo_horario",
+        "nombre": "PPA + red RFNBO horaria (modo 3)",
+        "modo_red": 3,
+        "diseno": {
+          "ppa_fv_kw": 1187.493,
+          "ppa_eol_kw": 3662.419,
+          "pem_kw": 538.796,
+          "buffer_h": 14.134,
+          "bat_kwh": 0.041,
+          "carga_min_hb": 0.3
+        },
+        "lcoa_eur_t": 3166,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 3018,
+          "p50": 3431,
+          "p95": 3923
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 2960,
+          "p50": 3347,
+          "p95": 3702,
+          "diseno_p5_p95": {
+            "ppa_fv_kw": [
+              1040.4,
+              1333.0
+            ],
+            "ppa_eol_kw": [
+              3323.0,
+              4373.5
+            ],
+            "pem_kw": [
+              510.5,
+              600.3
+            ],
+            "buffer_h": [
+              10.0,
+              21.0
+            ],
+            "bat_kwh": [
+              0.0,
+              2.9
+            ],
+            "carga_min_hb": [
+              0.2,
+              0.4
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 0,
+          "eolica": 0,
+          "pem": 517,
+          "buffer_h2": 30,
+          "psa_hb": 375,
+          "bateria": 0,
+          "tanque_nh3": 12,
+          "conexion_red": 21,
+          "permisos_ingenieria": 92,
+          "personal": 426,
+          "alquiler_terreno": 724,
+          "red_energia_omie": 0,
+          "red_peajes_cargos": 212,
+          "ppa": 1001,
+          "venta_excedentes": -246,
+          "agua": 3
+        },
+        "nh3_t_ano": 422.6,
+        "consumo_kwh_kg_nh3": 12.277,
+        "cf_hb": 0.965,
+        "cf_pem": 0.892,
+        "arranques_hb_ano": 0.5,
+        "import_red_mwh_ano": 0.0,
+        "potencia_contratada_kw": 655,
+        "tanque_nh3_t": 15.9,
+        "seveso": "no",
+        "superficie_m2": 3000,
+        "capex_total_eur": 2742506,
+        "lcoa_precios_2024": 3190,
+        "lcoa_precios_2025": 3136,
+        "rfnbo": {
+          "fraccion_renovable_mensual": 1.0,
+          "fraccion_renovable_horaria": 1.0,
+          "fraccion_renovable_electrolizador_horaria": 1.0,
+          "gei_mensual_gco2e_mj": 0.0,
+          "gei_horaria_gco2e_mj": 0.0,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": true,
+          "cumple_horaria_desde_2030": true,
+          "cumple_horaria_lectura_b": true
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 3036,
+            "p5_p95": [
+              2918,
+              3821
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 3047,
+            "p5_p95": [
+              2902,
+              3779
+            ],
+            "aplicable": true
+          },
+          "h2bank": {
+            "lcoa_base": 3065,
+            "p5_p95": [
+              2954,
+              3882
+            ],
+            "aplicable": true
+          },
+          "todo": {
+            "lcoa_base": 2817,
+            "p5_p95": [
+              2696,
+              3561
+            ],
+            "aplicable": true
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. "
+        },
+        "importancia_spearman": {
+          "superficie_planta_m2": 0.594,
+          "e_electrolizador_kwh_kg_h2": 0.398,
+          "personal_fte": 0.31,
+          "alquiler_eur_m2_mes": 0.244,
+          "e_lazo_hb_kwh_kg_nh3": 0.208,
+          "coste_fte_eur_a": 0.178,
+          "capex_pem_eur_kw": 0.141,
+          "capex_psa_eur": 0.14
+        },
+        "v2_equivalente": {
+          "escenario": "",
+          "lcoa": "",
+          "p5_p95": []
+        }
+      },
+      "fv_in_situ_suelo_red_aux": {
+        "escenario": "fv_in_situ_suelo_red_aux",
+        "nombre": "FV in situ en suelo alquilado + red aux.",
+        "modo_red": 1,
+        "diseno": {
+          "fv_kwp": 2571.773,
+          "pem_kw": 1782.155,
+          "buffer_h": 62.443,
+          "bat_kwh": 6.525,
+          "carga_min_hb": 0.327
+        },
+        "lcoa_eur_t": 19129,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 14888,
+          "p50": 18500,
+          "p95": 22284
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 15229,
+          "p50": 18147,
+          "p95": 22308,
+          "diseno_p5_p95": {
+            "fv_kwp": [
+              2448.7,
+              2918.6
+            ],
+            "pem_kw": [
+              1687.3,
+              1982.9
+            ],
+            "buffer_h": [
+              39.3,
+              73.8
+            ],
+            "bat_kwh": [
+              0.3,
+              6.8
+            ],
+            "carga_min_hb": [
+              0.2,
+              0.3
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 578,
+          "eolica": 0,
+          "pem": 1557,
+          "buffer_h2": 156,
+          "psa_hb": 441,
+          "bateria": 1,
+          "tanque_nh3": 37,
+          "conexion_red": 20,
+          "permisos_ingenieria": 236,
+          "personal": 502,
+          "alquiler_terreno": 15477,
+          "red_energia_omie": 94,
+          "red_peajes_cargos": 27,
+          "ppa": 0,
+          "venta_excedentes": 0,
+          "agua": 3
+        },
+        "nh3_t_ano": 358.8,
+        "consumo_kwh_kg_nh3": 12.383,
+        "cf_hb": 0.819,
+        "cf_pem": 0.229,
+        "arranques_hb_ano": 0.5,
+        "import_red_mwh_ano": 416.4,
+        "potencia_contratada_kw": 115,
+        "tanque_nh3_t": 41.5,
+        "seveso": "no",
+        "superficie_m2": 54435,
+        "capex_total_eur": 8049146,
+        "lcoa_precios_2024": 19728,
+        "lcoa_precios_2025": 18568,
+        "rfnbo": {
+          "fraccion_renovable_mensual": 0.906,
+          "fraccion_renovable_horaria": 0.906,
+          "fraccion_renovable_electrolizador_horaria": 1.0,
+          "gei_mensual_gco2e_mj": 12.154,
+          "gei_horaria_gco2e_mj": 12.154,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": false,
+          "cumple_horaria_desde_2030": false,
+          "cumple_horaria_lectura_b": true
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 18999,
+            "p5_p95": [
+              15411,
+              21637
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 18653,
+            "p5_p95": [
+              15044,
+              21018
+            ],
+            "aplicable": true
+          },
+          "h2bank": {
+            "lcoa_base": 19038,
+            "p5_p95": [
+              15465,
+              21686
+            ],
+            "aplicable": true
+          },
+          "todo": {
+            "lcoa_base": 18432,
+            "p5_p95": [
+              14828,
+              20815
+            ],
+            "aplicable": true
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. "
+        },
+        "importancia_spearman": {
+          "alquiler_eur_m2_mes": 0.672,
+          "ha_por_mwp_fv": 0.568,
+          "e_electrolizador_kwh_kg_h2": 0.395,
+          "e_lazo_hb_kwh_kg_nh3": 0.248,
+          "superficie_planta_m2": 0.133,
+          "capex_fv_eur_kwp": 0.129,
+          "conversion_global_lazo": 0.128,
+          "coste_linea_eur_km": 0.117
+        },
+        "v2_equivalente": {
+          "escenario": "red_auxiliares_fv_eol",
+          "lcoa": 2575,
+          "p5_p95": [
+            2391,
+            3302
+          ]
+        }
+      },
+      "fv_cubierta_red_aux": {
+        "escenario": "fv_cubierta_red_aux",
+        "nombre": "FV en cubierta/suelo sin alquiler + red aux.",
+        "modo_red": 1,
+        "diseno": {
+          "fv_kwp": 3672.304,
+          "pem_kw": 1500.709,
+          "buffer_h": 36.825,
+          "bat_kwh": 0.862,
+          "carga_min_hb": 0.369
+        },
+        "lcoa_eur_t": 4114,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 3871,
+          "p50": 4504,
+          "p95": 5142
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 3923,
+          "p50": 4356,
+          "p95": 4981,
+          "diseno_p5_p95": {
+            "fv_kwp": [
+              3453.6,
+              4192.1
+            ],
+            "pem_kw": [
+              1412.7,
+              1671.1
+            ],
+            "buffer_h": [
+              33.3,
+              41.7
+            ],
+            "bat_kwh": [
+              0.2,
+              4.2
+            ],
+            "carga_min_hb": [
+              0.3,
+              0.4
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 763,
+          "eolica": 0,
+          "pem": 1247,
+          "buffer_h2": 85,
+          "psa_hb": 408,
+          "bateria": 0,
+          "tanque_nh3": 29,
+          "conexion_red": 19,
+          "permisos_ingenieria": 187,
+          "personal": 464,
+          "alquiler_terreno": 788,
+          "red_energia_omie": 95,
+          "red_peajes_cargos": 26,
+          "ppa": 0,
+          "venta_excedentes": 0,
+          "agua": 3
+        },
+        "nh3_t_ano": 388.1,
+        "consumo_kwh_kg_nh3": 12.386,
+        "cf_hb": 0.886,
+        "cf_pem": 0.294,
+        "arranques_hb_ano": 1.0,
+        "import_red_mwh_ano": 457.5,
+        "potencia_contratada_kw": 115,
+        "tanque_nh3_t": 35.2,
+        "seveso": "no",
+        "superficie_m2": 3000,
+        "capex_total_eur": 8071705,
+        "lcoa_precios_2024": 4204,
+        "lcoa_precios_2025": 4024,
+        "rfnbo": {
+          "fraccion_renovable_mensual": 0.905,
+          "fraccion_renovable_horaria": 0.905,
+          "fraccion_renovable_electrolizador_horaria": 1.0,
+          "gei_mensual_gco2e_mj": 12.343,
+          "gei_horaria_gco2e_mj": 12.343,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": false,
+          "cumple_horaria_desde_2030": false,
+          "cumple_horaria_lectura_b": true
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 3985,
+            "p5_p95": [
+              3840,
+              5233
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 3756,
+            "p5_p95": [
+              3519,
+              4735
+            ],
+            "aplicable": true
+          },
+          "h2bank": {
+            "lcoa_base": 4023,
+            "p5_p95": [
+              3886,
+              5283
+            ],
+            "aplicable": true
+          },
+          "todo": {
+            "lcoa_base": 3535,
+            "p5_p95": [
+              3297,
+              4518
+            ],
+            "aplicable": true
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. "
+        },
+        "importancia_spearman": {
+          "superficie_planta_m2": 0.47,
+          "wacc": 0.353,
+          "e_electrolizador_kwh_kg_h2": 0.35,
+          "capex_pem_eur_kw": 0.295,
+          "personal_fte": 0.248,
+          "capex_fv_eur_kwp": 0.213,
+          "alquiler_eur_m2_mes": 0.207,
+          "e_lazo_hb_kwh_kg_nh3": 0.195
+        },
+        "v2_equivalente": {
+          "escenario": "red_auxiliares_fv_eol",
+          "lcoa": 2575,
+          "p5_p95": [
+            2391,
+            3302
+          ]
+        }
+      },
+      "aislado_fv_cubierta_bat": {
+        "escenario": "aislado_fv_cubierta_bat",
+        "nombre": "Aislado FV cubierta + bateria",
+        "modo_red": 0,
+        "diseno": {
+          "fv_kwp": 3889.506,
+          "pem_kw": 1353.22,
+          "buffer_h": 30.441,
+          "bat_kwh": 1893.796,
+          "carga_min_hb": 0.206
+        },
+        "lcoa_eur_t": 4338,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 4153,
+          "p50": 4992,
+          "p95": 8023
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 4113,
+          "p50": 4557,
+          "p95": 5231,
+          "diseno_p5_p95": {
+            "fv_kwp": [
+              3638.9,
+              4557.6
+            ],
+            "pem_kw": [
+              1298.5,
+              1541.9
+            ],
+            "buffer_h": [
+              27.1,
+              35.5
+            ],
+            "bat_kwh": [
+              1138.6,
+              2664.9
+            ],
+            "carga_min_hb": [
+              0.2,
+              0.2
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 841,
+          "eolica": 0,
+          "pem": 1180,
+          "buffer_h2": 73,
+          "psa_hb": 424,
+          "bateria": 274,
+          "tanque_nh3": 33,
+          "conexion_red": 0,
+          "permisos_ingenieria": 206,
+          "personal": 482,
+          "alquiler_terreno": 820,
+          "red_energia_omie": 0,
+          "red_peajes_cargos": 0,
+          "ppa": 0,
+          "venta_excedentes": 0,
+          "agua": 3
+        },
+        "nh3_t_ano": 373.1,
+        "consumo_kwh_kg_nh3": 12.465,
+        "cf_hb": 0.852,
+        "cf_pem": 0.316,
+        "arranques_hb_ano": 49.0,
+        "import_red_mwh_ano": 0.0,
+        "potencia_contratada_kw": 0,
+        "tanque_nh3_t": 39.3,
+        "seveso": "no",
+        "superficie_m2": 3000,
+        "capex_total_eur": 8552933,
+        "lcoa_precios_2024": "",
+        "lcoa_precios_2025": "",
+        "rfnbo": {
+          "fraccion_renovable_mensual": 1.0,
+          "fraccion_renovable_horaria": 1.0,
+          "fraccion_renovable_electrolizador_horaria": 1.0,
+          "gei_mensual_gco2e_mj": 0.0,
+          "gei_horaria_gco2e_mj": 0.0,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": true,
+          "cumple_horaria_desde_2030": true,
+          "cumple_horaria_lectura_b": true
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 4208,
+            "p5_p95": [
+              4179,
+              7826
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 4004,
+            "p5_p95": [
+              3872,
+              7245
+            ],
+            "aplicable": true
+          },
+          "h2bank": {
+            "lcoa_base": 4237,
+            "p5_p95": [
+              4221,
+              7876
+            ],
+            "aplicable": true
+          },
+          "todo": {
+            "lcoa_base": 3772,
+            "p5_p95": [
+              3655,
+              7018
+            ],
+            "aplicable": true
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. "
+        },
+        "importancia_spearman": {
+          "e_lazo_hb_kwh_kg_nh3": 0.78,
+          "superficie_planta_m2": 0.275,
+          "coste_fte_eur_a": 0.267,
+          "wacc": 0.198,
+          "min_parada_hb_h": 0.161,
+          "e_psa_kwh_nm3_n2": 0.16,
+          "capex_fv_eur_kwp": 0.156,
+          "alquiler_eur_m2_mes": 0.154
+        },
+        "v2_equivalente": {
+          "escenario": "aislado_solo_fv_bat",
+          "lcoa": 2767,
+          "p5_p95": [
+            2637,
+            5353
+          ]
+        }
+      },
+      "red_spot_omie_no_verde": {
+        "escenario": "red_spot_omie_no_verde",
+        "nombre": "Red spot OMIE (no verde)",
+        "modo_red": 2,
+        "diseno": {
+          "pem_kw": 498.277,
+          "buffer_h": 1.012,
+          "carga_min_hb": 0.202,
+          "umbral_eur_mwh": 199.274
+        },
+        "lcoa_eur_t": 3052,
+        "mc_diseno_fijo": {
+          "n": 300,
+          "p5": 2918,
+          "p50": 3347,
+          "p95": 3833
+        },
+        "mc_reoptimizado": {
+          "n": 64,
+          "p5": 2850,
+          "p50": 3219,
+          "p95": 3570,
+          "diseno_p5_p95": {
+            "pem_kw": [
+              473.2,
+              570.9
+            ],
+            "buffer_h": [
+              0.4,
+              1.8
+            ],
+            "umbral_eur_mwh": [
+              196.8,
+              199.7
+            ],
+            "carga_min_hb": [
+              0.2,
+              0.3
+            ]
+          }
+        },
+        "desglose_eur_t": {
+          "fv": 0,
+          "eolica": 0,
+          "pem": 479,
+          "buffer_h2": 2,
+          "psa_hb": 362,
+          "bateria": 0,
+          "tanque_nh3": 7,
+          "conexion_red": 20,
+          "permisos_ingenieria": 82,
+          "personal": 412,
+          "alquiler_terreno": 700,
+          "red_energia_omie": 783,
+          "red_peajes_cargos": 201,
+          "ppa": 0,
+          "venta_excedentes": 0,
+          "agua": 3
+        },
+        "nh3_t_ano": 437.0,
+        "consumo_kwh_kg_nh3": 12.27,
+        "cf_hb": 0.998,
+        "cf_pem": 0.998,
+        "arranques_hb_ano": 2.0,
+        "import_red_mwh_ano": 5362.5,
+        "potencia_contratada_kw": 613,
+        "tanque_nh3_t": 10.3,
+        "seveso": "no",
+        "superficie_m2": 3000,
+        "capex_total_eur": 2530755,
+        "lcoa_precios_2024": 3034,
+        "lcoa_precios_2025": 3069,
+        "rfnbo": {
+          "fraccion_renovable_mensual": 0.0,
+          "fraccion_renovable_horaria": 0.0,
+          "fraccion_renovable_electrolizador_horaria": 0.0,
+          "gei_mensual_gco2e_mj": 128.482,
+          "gei_horaria_gco2e_mj": 128.482,
+          "horas_excepcion_precio_frac": 0.268,
+          "umbral_excepcion_eur_mwh": 23.4,
+          "cumple_mensual_hasta_2029": false,
+          "cumple_horaria_desde_2030": false,
+          "cumple_horaria_lectura_b": false
+        },
+        "variantes_aparte": {
+          "o2": {
+            "lcoa_base": 2923,
+            "p5_p95": [
+              2806,
+              3759
+            ],
+            "aplicable": true
+          },
+          "pioneros": {
+            "lcoa_base": 2954,
+            "p5_p95": [
+              2820,
+              3745
+            ],
+            "aplicable": false
+          },
+          "h2bank": {
+            "lcoa_base": 3052,
+            "p5_p95": [
+              2932,
+              3902
+            ],
+            "aplicable": false
+          },
+          "todo": {
+            "lcoa_base": 2825,
+            "p5_p95": [
+              2688,
+              3615
+            ],
+            "aplicable": false
+          },
+          "nota": "H2 Pioneros: convocatorias 2022-2023 cerradas, intensidad 40-60 % solo sobre PEM+almacenamiento H2 (elegible); Hydrogen Bank: HIPOTETICO, el piloto (<5 MWe) no es elegible; prima solo sobre H2 RFNBO, 10 anos; O2: ingreso bruto sin coste de purificacion/logistica. Escenario no verde: ayudas no aplicables (se muestran solo como calculo)."
+        },
+        "importancia_spearman": {
+          "superficie_planta_m2": 0.585,
+          "e_electrolizador_kwh_kg_h2": 0.485,
+          "personal_fte": 0.285,
+          "alquiler_eur_m2_mes": 0.229,
+          "e_lazo_hb_kwh_kg_nh3": 0.2,
+          "coste_fte_eur_a": 0.16,
+          "capex_psa_eur": 0.137,
+          "capex_hb_eur": 0.137
+        },
+        "v2_equivalente": {
+          "escenario": "red_spot_omie_no_verde",
+          "lcoa": 1821,
+          "p5_p95": [
+            1721,
+            2232
+          ]
+        }
+      }
+    },
+    "mejor_verde": "ppa_rfnbo_horario",
+    "cumplimiento_rfnbo": {
+      "ppa_red_mensual": {
+        "cumple_mensual_hasta_2029": true,
+        "cumple_horaria_desde_2030": true,
+        "adicionalidad": "condicionada: PPA con planta nueva (<=36 meses, sin ayudas) o electrolizador en servicio antes de 1-1-2028 (exento hasta 1-1-2038)",
+        "geografica": "cumple (zona ES)",
+        "comentario": "PPA sobredimensionado (~9x PEM) cubre la demanda hora a hora con perfil nacional; la correlacion horaria no encarece (modo 3 = mismo LCOA)"
+      },
+      "ppa_rfnbo_horario": {
+        "cumple_mensual_hasta_2029": true,
+        "cumple_horaria_desde_2030": true,
+        "adicionalidad": "condicionada: PPA con planta nueva (<=36 meses, sin ayudas) o electrolizador en servicio antes de 1-1-2028 (exento hasta 1-1-2038)",
+        "geografica": "cumple (zona ES)",
+        "comentario": "PPA sobredimensionado (~9x PEM) cubre la demanda hora a hora con perfil nacional; la correlacion horaria no encarece (modo 3 = mismo LCOA)"
+      },
+      "fv_in_situ_suelo_red_aux": {
+        "cumple_mensual_hasta_2029": false,
+        "cumple_horaria_desde_2030": false,
+        "adicionalidad": "art. 3 FV nueva <=36 meses; la red de auxiliares no tiene PPA",
+        "geografica": "no aplica (directa) / cumple (red)",
+        "comentario": "lectura A (toda la electricidad): 90.6 % renovable -> solo esa fraccion seria RFNBO; GEI 12.2 gCO2e/MJ < 28.2 (cumple GEI). Lectura B (solo PEM+compresion): 100 % -> cumpliria. Requiere confirmacion juridica"
+      },
+      "fv_cubierta_red_aux": {
+        "cumple_mensual_hasta_2029": false,
+        "cumple_horaria_desde_2030": false,
+        "adicionalidad": "art. 3 FV nueva <=36 meses; la red de auxiliares no tiene PPA",
+        "geografica": "no aplica (directa) / cumple (red)",
+        "comentario": "lectura A (toda la electricidad): 90.5 % renovable -> solo esa fraccion seria RFNBO; GEI 12.3 gCO2e/MJ < 28.2 (cumple GEI). Lectura B (solo PEM+compresion): 100 % -> cumpliria. Requiere confirmacion juridica"
+      },
+      "aislado_fv_cubierta_bat": {
+        "cumple_mensual_hasta_2029": true,
+        "cumple_horaria_desde_2030": true,
+        "adicionalidad": "art. 3: FV en servicio <=36 meses antes del electrolizador",
+        "geografica": "no aplica",
+        "comentario": "conexion directa sin red: 100 % RFNBO"
+      },
+      "red_spot_omie_no_verde": {
+        "cumple_mensual_hasta_2029": false,
+        "cumple_horaria_desde_2030": false,
+        "adicionalidad": "no",
+        "geografica": "cumple",
+        "comentario": "sin PPA la red espanola no es renovable (art. 4); GEI 128 gCO2e/MJ > 28.2"
+      }
+    },
+    "amoniaco_gris": {
+      "gas_eur_t": 312,
+      "co2_eur_t": 117,
+      "gas_mas_co2_p5_p95": [
+        383,
+        562
+      ],
+      "referencias_mercado": [
+        "QCIntel 2024: coste implicito produccion Europa occidental medio 423 USD/t (2024)",
+        "Argus via Nitrogen Signal: 665 EUR/t excl. capex (abril 2026)",
+        "Haber-Bosch 2.0 EES 2026: amoniaco centralizado ~300 EUR/t historico, picos ~800 EUR/t"
+      ]
+    },
+    "cambios_vs_v2": [
+      "costes nuevos: personal, alquiler de suelo, permisos+ingenieria (% capex proceso), conexion a red (derechos + linea mt), tanque nh3 (tamano por balance horario + dias de seguridad)",
+      "rfnbo: contabilidad mensual (<=2029) y horaria (>=2030), excepcion de precio art. 6, gei 2023/1185; nuevo modo 3 (red solo en horas de excepcion)",
+      "eolica in situ eliminada (aeropuerto, cf 6-13 %); fv in situ separada en suelo alquilado y cubierta/suelo sin alquiler",
+      "monte carlo re-optimizando cada muestra (n=64) ademas del de diseno fijo (n=300)",
+      "venta de o2 y ayudas (h2 pioneros, hydrogen bank) como escenarios aparte"
+    ]
+  },
+  "tareas": [
+    {
+      "id": "p1",
+      "tarea": "cotizacion de alquiler de suelo industrial (no nave) en El Prat/Zona Franca para 1500-5000 m2 con uso quimico",
+      "criterio_aceptacion": ">= 3 ofertas escritas con EUR/m2/mes y condiciones de uso; rango recalculado y LCOA v4 actualizado",
+      "entregable": "data/cotizaciones_suelo.csv + delta LCOA en informe v4",
+      "plazo_semanas": 4,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p2",
+      "tarea": "cotizaciones de proveedor HB+PSA modular 1-2 t/d y PEM 0.5-1 MW",
+      "criterio_aceptacion": ">= 2 cotizaciones por equipo con CAPEX, carga minima, rampa y tiempo de arranque; sustituyen rangos de literatura",
+      "entregable": "data/cotizaciones_equipos.csv + supuestos actualizados en simulacion v4",
+      "plazo_semanas": 8,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p3",
+      "tarea": "oferta indicativa de PPA pay-as-produced eolico+FV de 1-5 MW (via agregador) con planta nueva (adicionalidad) y garantias de origen horarias",
+      "criterio_aceptacion": ">= 2 ofertas con precio EUR/MWh, perfil horario y fecha de puesta en servicio de la planta",
+      "entregable": "data/ofertas_ppa.csv + verificacion art. 5/6 en informe v4",
+      "plazo_semanas": 8,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p4",
+      "tarea": "dictamen juridico RFNBO: lectura A vs B para electricidad de auxiliares y aplicacion del art. 11 (en servicio antes de 1-1-2028)",
+      "criterio_aceptacion": "respuesta escrita de asesor o de la entidad certificadora (ISCC/REDcert/CertifHy) a 3 preguntas definidas",
+      "entregable": "docs/dictamen_rfnbo.md",
+      "plazo_semanas": 6,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p5",
+      "tarea": "ensayo/datos de fabricante E3 de arranque del HB (H2 perdido y parada minima)",
+      "criterio_aceptacion": "valor medido o garantizado de h_perdidas_arranque_hb y min_parada_hb_h con incertidumbre <= 25 %",
+      "entregable": "data/arranque_hb.json + re-optimizacion",
+      "plazo_semanas": 12,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p6",
+      "tarea": "plantilla operativa del piloto (FTE por turno) y perfil salarial",
+      "criterio_aceptacion": "organigrama con FTE justificados y coste por perfil con fuente (convenio quimico Cataluna)",
+      "entregable": "docs/plantilla_piloto.md; rango personal_fte/coste_fte sustituido",
+      "plazo_semanas": 4,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p7",
+      "tarea": "consulta a e-distribucion: punto de conexion MT, distancia y presupuesto",
+      "criterio_aceptacion": "pliego de condiciones tecnico-economicas con EUR y km",
+      "entregable": "data/conexion_red.json",
+      "plazo_semanas": 10,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p8",
+      "tarea": "validacion del modelo: reproducir un caso publicado (p. ej. Wang et al. iScience 2022 o EES 2026) con el nucleo v3",
+      "criterio_aceptacion": "LCOA reproducido dentro de +-10 % del publicado con sus supuestos",
+      "entregable": "validacion/caso_referencia.md + script",
+      "plazo_semanas": 3,
+      "estado": "pendiente"
+    },
+    {
+      "id": "h1",
+      "tarea": "costes faltantes, rfnbo y mc re-optimizado (v3)",
+      "criterio_aceptacion": "todos los parametros con fuente y rango; json sin valores nulos",
+      "entregable": "resultados.json v3",
+      "plazo_semanas": 0,
+      "estado": "hecho"
+    }
+  ],
+  "riesgos": [
+    {
+      "riesgo": "alquiler de suelo (rentas de nave 6.5-11 EUR/m2/mes) es el mayor coste nuevo (~700 EUR/t) y hace inviable la fv en suelo alquilado (~19 000 EUR/t)",
+      "impacto": "alto",
+      "mitigacion": "p1: cotizar suelo; fv en cubierta propia o ppa"
+    },
+    {
+      "riesgo": "costes fijos (personal + alquiler) ~1100-1300 EUR/t por la escala de 50 kg/h",
+      "impacto": "alto",
+      "mitigacion": "compartir personal/emplazamiento con instalacion existente; escalar"
+    },
+    {
+      "riesgo": "adicionalidad del ppa: requiere planta nueva salvo entrada en servicio antes de 1-1-2028",
+      "impacto": "alto",
+      "mitigacion": "p3, p4; calendario"
+    },
+    {
+      "riesgo": "interpretacion rfnbo de la electricidad de auxiliares tomada de red (lectura a vs b) en fv in situ",
+      "impacto": "medio",
+      "mitigacion": "p4; bateria o ppa para auxiliares"
+    },
+    {
+      "riesgo": "perfil ppa nacional (energy-charts) puede sobreestimar la cobertura horaria de un ppa de una planta concreta",
+      "impacto": "medio",
+      "mitigacion": "p3: perfil horario real de la planta"
+    },
+    {
+      "riesgo": "ayudas: h2 pioneros cerrado; hydrogen bank exige >= 5 mwe",
+      "impacto": "medio",
+      "mitigacion": "no incluidas en el caso base"
+    },
+    {
+      "riesgo": "sin datos experimentales (e2); capex de equipos a escala piloto inciertos",
+      "impacto": "alto",
+      "mitigacion": "p2, p5, p8"
+    }
+  ],
+  "decisiones": [
+    {
+      "decision": "escenario preferente: ppa + red; con perfil nacional cumple rfnbo mensual y horario sin coste adicional",
+      "tipo": "resultado_modelo",
+      "estado": "provisional"
+    },
+    {
+      "decision": "ayudas y venta de o2 fuera del caso base",
+      "tipo": "criterio_prudencia",
+      "estado": "hecho"
+    },
+    {
+      "decision": "eolica in situ descartada",
+      "tipo": "supuesto_de_diseno",
+      "estado": "hecho"
+    },
+    {
+      "decision": "lectura a (toda la electricidad) como criterio rfnbo conservador; lectura b informada",
+      "tipo": "supuesto_regulatorio",
+      "estado": "provisional"
+    },
+    {
+      "decision": "v2 conservada en v2/",
+      "tipo": "gestion",
+      "estado": "hecho"
+    }
+  ],
+  "proximo_paso": "p1 y p3 en paralelo (suelo y ppa: ~60 % del lcoa del escenario ppa); despues p2 y p4; re-optimizar en v4"
+}

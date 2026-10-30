@@ -1,0 +1,967 @@
+{
+  "meta": {
+    "proyecto": "cero_a",
+    "nivel_evidencia": "e2_validacion_concepto",
+    "tipo": "simulacion_base_prototipo_piloto",
+    "fecha": "2026-10-18",
+    "script": "simulacion_cero_a.py",
+    "semillas_meteo": [
+      11,
+      22,
+      33,
+      44,
+      55
+    ],
+    "n_monte_carlo": 200,
+    "tiempo_ejecucion_s": 25.6,
+    "datos_experimentales": [],
+    "advertencia": "resultados de modelo con supuestos de literatura; no validados experimentalmente"
+  },
+  "objetivo": "estimar balances de masa y energia, consumo especifico, produccion anual y factores de capacidad de un piloto fv+eolica -> pem -> buffer h2 -> psa n2 -> haber-bosch -> nh3, e identificar parametros criticos para pasar de e2 a e3",
+  "datos_clave": {
+    "diseno_piloto": {
+      "p_electrolizador_kw": 1000.0,
+      "p_fv_kwp": 1500.0,
+      "p_eolica_kw": 1000.0,
+      "nh3_nominal_kg_h": 50.0,
+      "buffer_h_nominal": 12.0,
+      "p_electrolizador_bar": 30.0,
+      "p_buffer_max_bar": 200.0,
+      "latitud_deg": 40.0,
+      "tau_control_h": 6.0,
+      "objetivo_soc": 0.3,
+      "arranque_buffer_h_min": 4.0,
+      "min_parada_h": 1,
+      "respaldo_red_auxiliares": true
+    },
+    "supuestos": [
+      {
+        "parametro": "e_electrolizador_kwh_kg_h2",
+        "base": 55.0,
+        "rango": [
+          50.0,
+          65.0
+        ],
+        "unidad": "kWh/kg H2 (sistema)",
+        "fuente": "IRENA (2020) Green Hydrogen Cost Reduction, Tabla KPI PEM 2020: sistema 50-83 kWh/kg; estado del arte 52-56 kWh/kg (KEROGREEN/ LUT 2022). Se acota a 50-65 (equipos actuales)."
+      },
+      {
+        "parametro": "carga_min_electrolizador",
+        "base": 0.05,
+        "rango": [
+          0.05,
+          0.1
+        ],
+        "unidad": "fraccion de potencia nominal",
+        "fuente": "IRENA (2020): rango de carga PEM 5-120 %; OIES EL47 (2022): carga parcial 0-10 %."
+      },
+      {
+        "parametro": "conversion_por_paso_hb",
+        "base": 0.15,
+        "rango": [
+          0.1,
+          0.25
+        ],
+        "unidad": "fraccion H2 convertida por paso",
+        "fuente": "Rouwenhorst et al. (2021) citado en Wang et al., iScience 25 (2022) 104724: conversion por paso 10-15 % en HB industrial; hasta ~25 % segun presion (Appl, Ullmann's)."
+      },
+      {
+        "parametro": "conversion_global_lazo",
+        "base": 0.98,
+        "rango": [
+          0.97,
+          0.99
+        ],
+        "unidad": "fraccion (con recirculacion y purga)",
+        "fuente": "Rouwenhorst et al. (2021) via Wang et al. (2022): conversion total 97-99 % con recirculacion."
+      },
+      {
+        "parametro": "e_lazo_hb_kwh_kg_nh3",
+        "base": 2.0,
+        "rango": [
+          0.64,
+          3.62
+        ],
+        "unidad": "kWh/kg NH3 (compresion syngas + recirculacion + refrigeracion)",
+        "fuente": "Rouwenhorst et al., RSER 114 (2019) 109339: planta pequena (Cussler) 3.62 kWh/kg; NFUEL ~2 kWh/kg sintesis; Ikaheimo et al., IJHE 43 (2018): 0.64 kWh/kg (gran escala). Base 2.0 = escala piloto."
+      },
+      {
+        "parametro": "e_psa_kwh_nm3_n2",
+        "base": 0.45,
+        "rango": [
+          0.3,
+          0.6
+        ],
+        "unidad": "kWh/Nm3 N2 (incl. compresor de aire)",
+        "fuente": "Messer, ficha PSA (99.9 % N2): 0.3-0.6 kWh/Nm3, rango operativo 80-100 %."
+      },
+      {
+        "parametro": "cf_fv",
+        "base": 0.19,
+        "rango": [
+          0.17,
+          0.21
+        ],
+        "unidad": "factor de capacidad anual",
+        "fuente": "REE, Informe Renovables 2023: 37.3 TWh FV con ~22.5 GW -> ~18.9 % (estimacion derivada; depende del emplazamiento)."
+      },
+      {
+        "parametro": "cf_eolica",
+        "base": 0.23,
+        "rango": [
+          0.2,
+          0.3
+        ],
+        "unidad": "factor de capacidad anual",
+        "fuente": "IEA Wind TCP, Spain 2023: CF eolica terrestre 23.3 %; emplazamientos buenos >= 30 %."
+      },
+      {
+        "parametro": "carga_min_hb",
+        "base": 0.4,
+        "rango": [
+          0.2,
+          0.6
+        ],
+        "unidad": "fraccion de capacidad nominal",
+        "fuente": "Armijo & Philibert, IJHE 45 (2020) 1541: 20 %; Fasihi et al., Appl. Energy 294 (2021): 20 %; ICAE 2021 (Australia): 40 % flexible; IEA 'normal' 60 %; Cheema & Krewer, RSC Adv. 8 (2018) 34926."
+      },
+      {
+        "parametro": "rampa_hb_frac_h",
+        "base": 0.2,
+        "rango": [
+          0.1,
+          0.3
+        ],
+        "unidad": "fraccion nominal por hora",
+        "fuente": "Evaluating the Economic Potential for Green Ammonia Production in Australia, ICAE 2021: HB flexible 40 % min y 20 %/h."
+      },
+      {
+        "parametro": "eficiencia_compresor_h2",
+        "base": 0.6,
+        "rango": [
+          0.5,
+          0.75
+        ],
+        "unidad": "eficiencia isoterma",
+        "fuente": "Trabajo isotermo ideal 30->200 bar (~0.45 kWh/kg) / eficiencia; contraste: DOE Program Record 9013 (2-4 kWh/kg a 350 bar). Rango = supuesto."
+      }
+    ],
+    "resultado_base_semilla_11": {
+      "nh3_t_ano": 305.467,
+      "consumo_especifico_kwh_kg_nh3": 12.322,
+      "consumo_electrolisis_kwh_kg_nh3": 9.961,
+      "cf_renovable": 0.206,
+      "cf_fv_real": 0.19,
+      "cf_eolica_real": 0.23,
+      "cf_electrolizador": 0.347,
+      "cf_hb": 0.697,
+      "horas_hb": 8002.0,
+      "arranques_hb": 90.0,
+      "vertido_frac": 0.185,
+      "import_red_mwh": 86.169,
+      "cuota_renovable": 0.977,
+      "eficiencia_lhv_ptx": 0.419,
+      "tanque_nh3_t_offtake_constante": 22.632,
+      "balance_masa_t": {
+        "h2_producido": 55.32,
+        "h2_al_hb": 55.343,
+        "h2_purgado": 1.107,
+        "delta_buffer_h2": -0.023,
+        "n2_al_hb": 256.357,
+        "n2_purgado": 5.127,
+        "agua_estequiometrica": 494.371,
+        "o2_subproducto": 439.076,
+        "nh3": 305.467,
+        "cierre_h2_kg": -0.0
+      },
+      "balance_energia_mwh": {
+        "renovable_generada": 4511.4,
+        "vertida": 833.738,
+        "electrolizador": 3042.61,
+        "compresion_buffer": 18.044,
+        "lazo_hb": 610.933,
+        "psa_n2": 92.244,
+        "importada_red": 86.169,
+        "lhv_h2_producido": 1843.822,
+        "lhv_nh3": 1578.244,
+        "calor_reaccion_hb": 228.689,
+        "lhv_h2_purgado": 36.892
+      },
+      "lazo": {
+        "fraccion_purga": 0.004,
+        "ratio_recirculacion_molar": 5.533,
+        "buffer_kg_h2": 108.706,
+        "e_compresion_kwh_kg_h2": 1.062
+      }
+    },
+    "variabilidad_meteo_base_5_semillas": {
+      "nh3_t_ano": {
+        "media": 302.98,
+        "min": 301.56,
+        "max": 305.467
+      },
+      "consumo_especifico_kwh_kg_nh3": {
+        "media": 12.328,
+        "min": 12.322,
+        "max": 12.336
+      },
+      "cf_hb": {
+        "media": 0.692,
+        "min": 0.688,
+        "max": 0.697
+      },
+      "arranques_hb": {
+        "media": 91.0,
+        "min": 84.0,
+        "max": 95.0
+      }
+    },
+    "escenario_aislado_sin_red": {
+      "nh3_t_ano": {
+        "media": 269.063,
+        "min": 266.384,
+        "max": 273.015
+      },
+      "consumo_especifico_kwh_kg_nh3": {
+        "media": 12.312,
+        "min": 12.307,
+        "max": 12.316
+      },
+      "cf_hb": {
+        "media": 0.614,
+        "min": 0.608,
+        "max": 0.623
+      },
+      "arranques_hb": {
+        "media": 521.0,
+        "min": 507.0,
+        "max": 541.0
+      }
+    },
+    "monte_carlo_p5_p50_p95": {
+      "nh3_t_ano": {
+        "p5": 276.175,
+        "p50": 297.59,
+        "p95": 321.334
+      },
+      "consumo_especifico_kwh_kg_nh3": {
+        "p5": 11.374,
+        "p50": 12.719,
+        "p95": 14.218
+      },
+      "cf_hb": {
+        "p5": 0.631,
+        "p50": 0.679,
+        "p95": 0.734
+      },
+      "cf_electrolizador": {
+        "p5": 0.326,
+        "p50": 0.349,
+        "p95": 0.375
+      },
+      "vertido_frac": {
+        "p5": 0.15,
+        "p50": 0.197,
+        "p95": 0.254
+      },
+      "eficiencia_lhv_ptx": {
+        "p5": 0.363,
+        "p50": 0.406,
+        "p95": 0.454
+      },
+      "arranques_hb": {
+        "p5": 44.0,
+        "p50": 98.0,
+        "p95": 156.05
+      }
+    },
+    "importancia_spearman": {
+      "nh3_t_ano": {
+        "e_electrolizador_kwh_kg_h2": -0.633,
+        "carga_min_electrolizador": -0.144,
+        "conversion_por_paso_hb": 0.035,
+        "conversion_global_lazo": 0.101,
+        "e_lazo_hb_kwh_kg_nh3": -0.345,
+        "e_psa_kwh_nm3_n2": -0.148,
+        "cf_fv": 0.335,
+        "cf_eolica": 0.505,
+        "carga_min_hb": -0.113,
+        "rampa_hb_frac_h": 0.064,
+        "eficiencia_compresor_h2": -0.106
+      },
+      "consumo_especifico_kwh_kg_nh3": {
+        "e_electrolizador_kwh_kg_h2": 0.788,
+        "carga_min_electrolizador": 0.12,
+        "conversion_por_paso_hb": -0.043,
+        "conversion_global_lazo": -0.031,
+        "e_lazo_hb_kwh_kg_nh3": 0.658,
+        "e_psa_kwh_nm3_n2": 0.1,
+        "cf_fv": 0.015,
+        "cf_eolica": 0.04,
+        "carga_min_hb": 0.172,
+        "rampa_hb_frac_h": -0.059,
+        "eficiencia_compresor_h2": -0.023
+      }
+    },
+    "sensibilidad": {
+      "e_electrolizador_kwh_kg_h2": [
+        {
+          "valor": 50,
+          "nh3_t_ano": 314.04699919230717,
+          "consumo_especifico_kwh_kg_nh3": 11.423440449349792,
+          "cf_hb": 0.7170022812609752,
+          "arranques_hb": 77.6,
+          "vertido_frac": 0.22637418213286162
+        },
+        {
+          "valor": 52.5,
+          "nh3_t_ano": 308.6081594650027,
+          "consumo_especifico_kwh_kg_nh3": 11.875439011607172,
+          "cf_hb": 0.7045848389611933,
+          "arranques_hb": 83.2,
+          "vertido_frac": 0.20834935108549998
+        },
+        {
+          "valor": 55,
+          "nh3_t_ano": 302.97960790616446,
+          "consumo_especifico_kwh_kg_nh3": 12.327580034375982,
+          "cf_hb": 0.6917342646259461,
+          "arranques_hb": 91.0,
+          "vertido_frac": 0.19190703975809176
+        },
+        {
+          "valor": 57.5,
+          "nh3_t_ano": 296.933209286787,
+          "consumo_especifico_kwh_kg_nh3": 12.779713829308928,
+          "cf_hb": 0.677929701568007,
+          "arranques_hb": 97.4,
+          "vertido_frac": 0.17772002687990637
+        },
+        {
+          "valor": 60,
+          "nh3_t_ano": 290.6890317386805,
+          "consumo_especifico_kwh_kg_nh3": 13.231244848422502,
+          "cf_hb": 0.6636735884444761,
+          "arranques_hb": 104.2,
+          "vertido_frac": 0.1653193674640955
+        },
+        {
+          "valor": 62.5,
+          "nh3_t_ano": 284.18298741516276,
+          "consumo_especifico_kwh_kg_nh3": 13.682911818008439,
+          "cf_hb": 0.6488196059706912,
+          "arranques_hb": 110.2,
+          "vertido_frac": 0.1549500017337866
+        },
+        {
+          "valor": 65,
+          "nh3_t_ano": 277.5883251935891,
+          "consumo_especifico_kwh_kg_nh3": 14.134801002559522,
+          "cf_hb": 0.6337632995287423,
+          "arranques_hb": 117.8,
+          "vertido_frac": 0.14625018084817062
+        }
+      ],
+      "buffer_h_nominal": {
+        "carga_min_0.2": [
+          {
+            "valor": 0,
+            "nh3_t_ano": 206.9815869165031,
+            "consumo_especifico_kwh_kg_nh3": 12.316430483597228,
+            "cf_hb": 0.4725607007226098,
+            "arranques_hb": 607.6,
+            "vertido_frac": 0.43492585855190696
+          },
+          {
+            "valor": 2,
+            "nh3_t_ano": 228.26411846805595,
+            "consumo_especifico_kwh_kg_nh3": 12.293081935043833,
+            "cf_hb": 0.5211509554065203,
+            "arranques_hb": 250.0,
+            "vertido_frac": 0.38175522354778113
+          },
+          {
+            "valor": 4,
+            "nh3_t_ano": 259.7788802379592,
+            "consumo_especifico_kwh_kg_nh3": 12.304598846908467,
+            "cf_hb": 0.5931024662967106,
+            "arranques_hb": 99.0,
+            "vertido_frac": 0.29959556505664475
+          },
+          {
+            "valor": 8,
+            "nh3_t_ano": 283.7922188275701,
+            "consumo_especifico_kwh_kg_nh3": 12.316249916887624,
+            "cf_hb": 0.6479274402455939,
+            "arranques_hb": 40.6,
+            "vertido_frac": 0.2372467315192856
+          },
+          {
+            "valor": 12,
+            "nh3_t_ano": 300.1466058517217,
+            "consumo_especifico_kwh_kg_nh3": 12.324562479106932,
+            "cf_hb": 0.6852662234057574,
+            "arranques_hb": 17.2,
+            "vertido_frac": 0.19694141491047512
+          },
+          {
+            "valor": 24,
+            "nh3_t_ano": 317.49899539211384,
+            "consumo_especifico_kwh_kg_nh3": 12.333609138254575,
+            "cf_hb": 0.7248835511235475,
+            "arranques_hb": 2.0,
+            "vertido_frac": 0.15424175990003072
+          },
+          {
+            "valor": 48,
+            "nh3_t_ano": 329.67019503249,
+            "consumo_especifico_kwh_kg_nh3": 12.338406061943909,
+            "cf_hb": 0.7526716781563698,
+            "arranques_hb": 1.0,
+            "vertido_frac": 0.124247448464498
+          },
+          {
+            "valor": 72,
+            "nh3_t_ano": 333.3944807147858,
+            "consumo_especifico_kwh_kg_nh3": 12.339764007224783,
+            "cf_hb": 0.7611746135040771,
+            "arranques_hb": 1.0,
+            "vertido_frac": 0.11513903806248352
+          }
+        ],
+        "carga_min_0.4": [
+          {
+            "valor": 0,
+            "nh3_t_ano": 200.4096018152745,
+            "consumo_especifico_kwh_kg_nh3": 12.413287547642845,
+            "cf_hb": 0.457556168528024,
+            "arranques_hb": 638.6,
+            "vertido_frac": 0.4485637896815525
+          },
+          {
+            "valor": 2,
+            "nh3_t_ano": 224.40461684690163,
+            "consumo_especifico_kwh_kg_nh3": 12.294582062873719,
+            "cf_hb": 0.5123393078696383,
+            "arranques_hb": 297.8,
+            "vertido_frac": 0.3920720901016165
+          },
+          {
+            "valor": 4,
+            "nh3_t_ano": 251.39686100342504,
+            "consumo_especifico_kwh_kg_nh3": 12.310655283094519,
+            "cf_hb": 0.573965436080879,
+            "arranques_hb": 248.2,
+            "vertido_frac": 0.32375487445386886
+          },
+          {
+            "valor": 8,
+            "nh3_t_ano": 288.1879463119136,
+            "consumo_especifico_kwh_kg_nh3": 12.321858781915365,
+            "cf_hb": 0.657963347744095,
+            "arranques_hb": 114.0,
+            "vertido_frac": 0.22847713469436357
+          },
+          {
+            "valor": 12,
+            "nh3_t_ano": 302.97960790616446,
+            "consumo_especifico_kwh_kg_nh3": 12.327580034375982,
+            "cf_hb": 0.6917342646259461,
+            "arranques_hb": 91.0,
+            "vertido_frac": 0.19190703975809176
+          },
+          {
+            "valor": 24,
+            "nh3_t_ano": 319.9878446964016,
+            "consumo_especifico_kwh_kg_nh3": 12.334868297492227,
+            "cf_hb": 0.7305658554712366,
+            "arranques_hb": 40.4,
+            "vertido_frac": 0.15092552526185257
+          },
+          {
+            "valor": 48,
+            "nh3_t_ano": 331.61673558336,
+            "consumo_especifico_kwh_kg_nh3": 12.338233519554972,
+            "cf_hb": 0.7571158346652054,
+            "arranques_hb": 10.0,
+            "vertido_frac": 0.1227175575088852
+          },
+          {
+            "valor": 72,
+            "nh3_t_ano": 335.1263911901724,
+            "consumo_especifico_kwh_kg_nh3": 12.339542033977065,
+            "cf_hb": 0.7651287470095258,
+            "arranques_hb": 5.0,
+            "vertido_frac": 0.11422891651487979
+          }
+        ],
+        "carga_min_0.6": [
+          {
+            "valor": 0,
+            "nh3_t_ano": 191.16024777264306,
+            "consumo_especifico_kwh_kg_nh3": 12.544024763488556,
+            "cf_hb": 0.43643892185534944,
+            "arranques_hb": 654.4,
+            "vertido_frac": 0.46847546468767776
+          },
+          {
+            "valor": 2,
+            "nh3_t_ano": 231.14267722205005,
+            "consumo_especifico_kwh_kg_nh3": 12.295556976819194,
+            "cf_hb": 0.5277230073562785,
+            "arranques_hb": 344.6,
+            "vertido_frac": 0.3734022364162856
+          },
+          {
+            "valor": 4,
+            "nh3_t_ano": 247.9847601273604,
+            "consumo_especifico_kwh_kg_nh3": 12.312872876627349,
+            "cf_hb": 0.5661752514323297,
+            "arranques_hb": 291.8,
+            "vertido_frac": 0.33329628763489805
+          },
+          {
+            "valor": 8,
+            "nh3_t_ano": 290.75980118063495,
+            "consumo_especifico_kwh_kg_nh3": 12.32919514104427,
+            "cf_hb": 0.6638351625128651,
+            "arranques_hb": 193.6,
+            "vertido_frac": 0.22484318595714098
+          },
+          {
+            "valor": 12,
+            "nh3_t_ano": 305.7731224912671,
+            "consumo_especifico_kwh_kg_nh3": 12.331931727971966,
+            "cf_hb": 0.6981121518065458,
+            "arranques_hb": 148.6,
+            "vertido_frac": 0.18684598443269546
+          },
+          {
+            "valor": 24,
+            "nh3_t_ano": 322.10445594981303,
+            "consumo_especifico_kwh_kg_nh3": 12.33744835626769,
+            "cf_hb": 0.7353983012552808,
+            "arranques_hb": 105.2,
+            "vertido_frac": 0.1473792180096973
+          },
+          {
+            "valor": 48,
+            "nh3_t_ano": 333.23764831352406,
+            "consumo_especifico_kwh_kg_nh3": 12.337576910799873,
+            "cf_hb": 0.7608165486610138,
+            "arranques_hb": 57.8,
+            "vertido_frac": 0.12140299173565183
+          },
+          {
+            "valor": 72,
+            "nh3_t_ano": 336.62247910173534,
+            "consumo_especifico_kwh_kg_nh3": 12.33559230923576,
+            "cf_hb": 0.7685444728350121,
+            "arranques_hb": 39.0,
+            "vertido_frac": 0.11403431250295841
+          }
+        ]
+      },
+      "carga_min_hb": {
+        "buffer_4h": [
+          {
+            "valor": 0.1,
+            "nh3_t_ano": 258.7152607411082,
+            "consumo_especifico_kwh_kg_nh3": 12.299652726912424,
+            "cf_hb": 0.590674111281069,
+            "arranques_hb": 31.8,
+            "vertido_frac": 0.30040364441855083
+          },
+          {
+            "valor": 0.2,
+            "nh3_t_ano": 259.7788802379592,
+            "consumo_especifico_kwh_kg_nh3": 12.304598846908467,
+            "cf_hb": 0.5931024662967106,
+            "arranques_hb": 99.0,
+            "vertido_frac": 0.29959556505664475
+          },
+          {
+            "valor": 0.3,
+            "nh3_t_ano": 254.24396840555704,
+            "consumo_especifico_kwh_kg_nh3": 12.308433339834336,
+            "cf_hb": 0.5804656812912261,
+            "arranques_hb": 200.4,
+            "vertido_frac": 0.31571349864821896
+          },
+          {
+            "valor": 0.4,
+            "nh3_t_ano": 251.39686100342504,
+            "consumo_especifico_kwh_kg_nh3": 12.310655283094519,
+            "cf_hb": 0.573965436080879,
+            "arranques_hb": 248.2,
+            "vertido_frac": 0.32375487445386886
+          },
+          {
+            "valor": 0.5,
+            "nh3_t_ano": 249.35076671731917,
+            "consumo_especifico_kwh_kg_nh3": 12.311789330851846,
+            "cf_hb": 0.5692939879390849,
+            "arranques_hb": 271.8,
+            "vertido_frac": 0.32946889665167994
+          },
+          {
+            "valor": 0.6,
+            "nh3_t_ano": 247.9847601273604,
+            "consumo_especifico_kwh_kg_nh3": 12.312872876627349,
+            "cf_hb": 0.5661752514323297,
+            "arranques_hb": 291.8,
+            "vertido_frac": 0.33329628763489805
+          },
+          {
+            "valor": 0.8,
+            "nh3_t_ano": 244.44241810190573,
+            "consumo_especifico_kwh_kg_nh3": 12.315798497104334,
+            "cf_hb": 0.5580877125614286,
+            "arranques_hb": 311.4,
+            "vertido_frac": 0.3431976756958791
+          },
+          {
+            "valor": 1.0,
+            "nh3_t_ano": 245.98000000000002,
+            "consumo_especifico_kwh_kg_nh3": 12.316860450274254,
+            "cf_hb": 0.5615981735159817,
+            "arranques_hb": 334.2,
+            "vertido_frac": 0.3375660804829073
+          }
+        ],
+        "buffer_12h": [
+          {
+            "valor": 0.1,
+            "nh3_t_ano": 298.7906899692258,
+            "consumo_especifico_kwh_kg_nh3": 12.32288273307175,
+            "cf_hb": 0.6821705250438945,
+            "arranques_hb": 1.0,
+            "vertido_frac": 0.19914838709896787
+          },
+          {
+            "valor": 0.2,
+            "nh3_t_ano": 300.1466058517217,
+            "consumo_especifico_kwh_kg_nh3": 12.324562479106932,
+            "cf_hb": 0.6852662234057574,
+            "arranques_hb": 17.2,
+            "vertido_frac": 0.19694141491047512
+          },
+          {
+            "valor": 0.3,
+            "nh3_t_ano": 301.5535393527954,
+            "consumo_especifico_kwh_kg_nh3": 12.326196209638688,
+            "cf_hb": 0.6884784003488479,
+            "arranques_hb": 57.8,
+            "vertido_frac": 0.19460576211472969
+          },
+          {
+            "valor": 0.4,
+            "nh3_t_ano": 302.97960790616446,
+            "consumo_especifico_kwh_kg_nh3": 12.327580034375982,
+            "cf_hb": 0.6917342646259461,
+            "arranques_hb": 91.0,
+            "vertido_frac": 0.19190703975809176
+          },
+          {
+            "valor": 0.5,
+            "nh3_t_ano": 304.42035340998916,
+            "consumo_especifico_kwh_kg_nh3": 12.329694027073847,
+            "cf_hb": 0.6950236379223498,
+            "arranques_hb": 120.0,
+            "vertido_frac": 0.1892483541407119
+          },
+          {
+            "valor": 0.6,
+            "nh3_t_ano": 305.7731224912671,
+            "consumo_especifico_kwh_kg_nh3": 12.331931727971966,
+            "cf_hb": 0.6981121518065458,
+            "arranques_hb": 148.6,
+            "vertido_frac": 0.18684598443269546
+          },
+          {
+            "valor": 0.8,
+            "nh3_t_ano": 307.83357299015626,
+            "consumo_especifico_kwh_kg_nh3": 12.337310486936794,
+            "cf_hb": 0.7028163766898544,
+            "arranques_hb": 202.2,
+            "vertido_frac": 0.18401672183592768
+          },
+          {
+            "valor": 1.0,
+            "nh3_t_ano": 308.05,
+            "consumo_especifico_kwh_kg_nh3": 12.34467022005207,
+            "cf_hb": 0.7033105022831051,
+            "arranques_hb": 249.4,
+            "vertido_frac": 0.18619755814511615
+          }
+        ],
+        "buffer_48h": [
+          {
+            "valor": 0.1,
+            "nh3_t_ano": 329.00225405398066,
+            "consumo_especifico_kwh_kg_nh3": 12.33763557225863,
+            "cf_hb": 0.7511466987533805,
+            "arranques_hb": 1.0,
+            "vertido_frac": 0.12481652724565558
+          },
+          {
+            "valor": 0.2,
+            "nh3_t_ano": 329.67019503249,
+            "consumo_especifico_kwh_kg_nh3": 12.338406061943909,
+            "cf_hb": 0.7526716781563698,
+            "arranques_hb": 1.0,
+            "vertido_frac": 0.124247448464498
+          },
+          {
+            "valor": 0.3,
+            "nh3_t_ano": 330.65913097372174,
+            "consumo_especifico_kwh_kg_nh3": 12.338348202631636,
+            "cf_hb": 0.7549295227710542,
+            "arranques_hb": 2.6,
+            "vertido_frac": 0.12339504807939901
+          },
+          {
+            "valor": 0.4,
+            "nh3_t_ano": 331.61673558336,
+            "consumo_especifico_kwh_kg_nh3": 12.338233519554972,
+            "cf_hb": 0.7571158346652054,
+            "arranques_hb": 10.0,
+            "vertido_frac": 0.1227175575088852
+          },
+          {
+            "valor": 0.5,
+            "nh3_t_ano": 332.5474276355286,
+            "consumo_especifico_kwh_kg_nh3": 12.33826898471468,
+            "cf_hb": 0.7592407023642206,
+            "arranques_hb": 29.6,
+            "vertido_frac": 0.12200698428288428
+          },
+          {
+            "valor": 0.6,
+            "nh3_t_ano": 333.23764831352406,
+            "consumo_especifico_kwh_kg_nh3": 12.337576910799873,
+            "cf_hb": 0.7608165486610138,
+            "arranques_hb": 57.8,
+            "vertido_frac": 0.12140299173565183
+          },
+          {
+            "valor": 0.8,
+            "nh3_t_ano": 334.25986093268244,
+            "consumo_especifico_kwh_kg_nh3": 12.337032389707307,
+            "cf_hb": 0.7631503674262156,
+            "arranques_hb": 119.2,
+            "vertido_frac": 0.11998924758204385
+          },
+          {
+            "valor": 1.0,
+            "nh3_t_ano": 335.33000000000004,
+            "consumo_especifico_kwh_kg_nh3": 12.33355201820689,
+            "cf_hb": 0.7655936073059361,
+            "arranques_hb": 183.2,
+            "vertido_frac": 0.11762599143710437
+          }
+        ]
+      },
+      "politica_control_hb": [
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 306.06884444950754,
+          "arranques_hb": 53.6
+        },
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 306.84372929640216,
+          "arranques_hb": 116.8
+        },
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 307.7827670058779,
+          "arranques_hb": 168.6
+        },
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 297.94956749718597,
+          "arranques_hb": 38.4
+        },
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 299.6226294964669,
+          "arranques_hb": 96.8
+        },
+        {
+          "objetivo_soc": 0.15,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 303.2000452917618,
+          "arranques_hb": 145.6
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 300.1466058517217,
+          "arranques_hb": 17.2
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 302.97960790616446,
+          "arranques_hb": 91.0
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 305.7731224912671,
+          "arranques_hb": 148.6
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 290.8499320071006,
+          "arranques_hb": 20.2
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 295.1125116877914,
+          "arranques_hb": 79.4
+        },
+        {
+          "objetivo_soc": 0.3,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 301.5116471702903,
+          "arranques_hb": 135.6
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 287.21614139007426,
+          "arranques_hb": 3.2
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 294.5723638644893,
+          "arranques_hb": 59.2
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 6.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 301.85474833420443,
+          "arranques_hb": 127.6
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.2,
+          "nh3_t_ano": 279.1589140825064,
+          "arranques_hb": 4.6
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.4,
+          "nh3_t_ano": 289.15949439034955,
+          "arranques_hb": 61.6
+        },
+        {
+          "objetivo_soc": 0.5,
+          "tau_control_h": 12.0,
+          "carga_min_hb": 0.6,
+          "nh3_t_ano": 299.27230343674444,
+          "arranques_hb": 125.4
+        }
+      ]
+    }
+  },
+  "tareas": [
+    {
+      "id": "t1",
+      "tarea": "sustituir perfiles sinteticos por series horarias reales del emplazamiento (pvgis / era5)",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t2",
+      "tarea": "obtener curva de eficiencia a carga parcial del pem y del psa de proveedor",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t3",
+      "tarea": "modelo cinetico/termico del lazo hb a baja carga (temperatura lecho, autotermia, arranques)",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t4",
+      "tarea": "optimizar dimensionado conjunto (renovable/electrolizador/buffer/hb/bateria) con costes",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t5",
+      "tarea": "disenar campana experimental minima para e3 (rampa y carga minima hb, deoxo n2)",
+      "estado": "pendiente"
+    }
+  ],
+  "riesgos": [
+    {
+      "riesgo": "carga minima y rampa del hb a escala piloto no demostradas; domina la produccion",
+      "impacto": "alto",
+      "mitigacion": "ensayo dedicado; buffer >= 12 h"
+    },
+    {
+      "riesgo": "consumo del lazo hb a pequena escala muy incierto (0.64-3.62 kWh/kg nh3)",
+      "impacto": "medio",
+      "mitigacion": "datos de proveedor de lazo modular"
+    },
+    {
+      "riesgo": "operacion aislada: auxiliares sin renovable de noche provocan paradas del hb",
+      "impacto": "alto",
+      "mitigacion": "respaldo de red o bateria para auxiliares"
+    },
+    {
+      "riesgo": "psa con rango operativo 80-100 % (messer) no sigue la carga del hb; o2 residual envenena catalizador",
+      "impacto": "medio",
+      "mitigacion": "psa modular + buffer n2 + deoxo"
+    },
+    {
+      "riesgo": "perfiles renovables sinteticos calibrados solo en factor de capacidad",
+      "impacto": "medio",
+      "mitigacion": "tarea t1"
+    }
+  ],
+  "decisiones": [
+    {
+      "decision": "piloto de 1 mw pem, 1.5 mwp fv, 1 mw eolica, hb 50 kg/h nh3",
+      "tipo": "supuesto_de_diseno",
+      "estado": "provisional"
+    },
+    {
+      "decision": "respaldo de red solo para auxiliares hb+psa en caso base; escenario aislado como alternativa",
+      "tipo": "supuesto_de_diseno",
+      "estado": "provisional"
+    },
+    {
+      "decision": "eficiencias constantes con la carga (sin curvas de carga parcial)",
+      "tipo": "simplificacion",
+      "estado": "provisional"
+    }
+  ],
+  "proximo_paso": "ejecutar t1 (series reales del emplazamiento) y t4 (dimensionado con costes) para fijar buffer y carga minima objetivo del hb; despues definir el ensayo experimental e3"
+}

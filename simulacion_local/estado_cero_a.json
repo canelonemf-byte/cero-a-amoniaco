@@ -1,0 +1,330 @@
+{
+  "meta": {
+    "proyecto": "cero_a",
+    "version": "v3",
+    "fecha": "2026-10-20",
+    "zona_horaria": "Europe/Madrid",
+    "autoria": "Lázaro López Paz, El Prat de Llobregat, Barcelona, España; con asistencia de inteligencia artificial",
+    "nivel_evidencia": "e2",
+    "emplazamiento": "el_prat_de_llobregat",
+    "versiones": [
+      "v1/",
+      "v2/",
+      "v3 (raiz)"
+    ],
+    "ficheros": [
+      "resultados.json",
+      "informe.md",
+      "grafico_lcoa_v3.png",
+      "simulacion_cero_a_v3.py",
+      "construir_v3.py",
+      "log_v3.txt"
+    ],
+    "ultima_revision": "2026-10-26",
+    "revisiones": [
+      "2026-10-26: seguimiento semanal automatico; sin cambio material de lcoa"
+    ]
+  },
+  "objetivo": "amoniaco_verde_piloto_50_kg_h_nh3_rfnbo_con_lcoa_completo",
+  "datos_clave": {
+    "mejor_escenario_verde": "ppa_rfnbo_horario",
+    "lcoa_mejor_verde_eur_t": 3166,
+    "lcoa_mejor_verde_p5_p95_reoptimizado": [
+      2960,
+      3702
+    ],
+    "lcoa_por_escenario": {
+      "ppa_red_mensual": {
+        "base": 3166,
+        "p5_p95_reopt": [
+          2960,
+          3701
+        ],
+        "p5_p95_fijo": [
+          3017,
+          3924
+        ]
+      },
+      "ppa_rfnbo_horario": {
+        "base": 3166,
+        "p5_p95_reopt": [
+          2960,
+          3702
+        ],
+        "p5_p95_fijo": [
+          3018,
+          3923
+        ]
+      },
+      "fv_in_situ_suelo_red_aux": {
+        "base": 19129,
+        "p5_p95_reopt": [
+          15229,
+          22308
+        ],
+        "p5_p95_fijo": [
+          14888,
+          22284
+        ]
+      },
+      "fv_cubierta_red_aux": {
+        "base": 4114,
+        "p5_p95_reopt": [
+          3923,
+          4981
+        ],
+        "p5_p95_fijo": [
+          3871,
+          5142
+        ]
+      },
+      "aislado_fv_cubierta_bat": {
+        "base": 4338,
+        "p5_p95_reopt": [
+          4113,
+          5231
+        ],
+        "p5_p95_fijo": [
+          4153,
+          8023
+        ]
+      },
+      "red_spot_omie_no_verde": {
+        "base": 3052,
+        "p5_p95_reopt": [
+          2850,
+          3570
+        ],
+        "p5_p95_fijo": [
+          2918,
+          3833
+        ]
+      }
+    },
+    "rfnbo": {
+      "ppa_red_mensual": {
+        "mensual": true,
+        "horaria": true,
+        "fraccion_horaria": 1.0
+      },
+      "ppa_rfnbo_horario": {
+        "mensual": true,
+        "horaria": true,
+        "fraccion_horaria": 1.0
+      },
+      "fv_in_situ_suelo_red_aux": {
+        "mensual": false,
+        "horaria": false,
+        "fraccion_horaria": 0.906
+      },
+      "fv_cubierta_red_aux": {
+        "mensual": false,
+        "horaria": false,
+        "fraccion_horaria": 0.905
+      },
+      "aislado_fv_cubierta_bat": {
+        "mensual": true,
+        "horaria": true,
+        "fraccion_horaria": 1.0
+      },
+      "red_spot_omie_no_verde": {
+        "mensual": false,
+        "horaria": false,
+        "fraccion_horaria": 0.0
+      }
+    },
+    "lcoa_v2_ppa_eur_t": 1849,
+    "lcoa_gris_eur_t": [
+      383,
+      562
+    ],
+    "produccion_t_ano": 422.6,
+    "vigilancia_2026_10_26": {
+      "omie_es_eur_mwh": {
+        "semana_08_14_oct": 141.51,
+        "semana_15_21_oct": 160.83,
+        "media_oct_hasta_25": 155.02,
+        "max_diario": "215.11 (19-10-2026, maximo desde abr-2022)",
+        "fuente": "consultoriala.com informes semanales; electricidadde.com/mes/2026-10",
+        "impacto": "no afecta al escenario ppa (red_energia_omie 0); encarece red_spot_omie_no_verde y auxiliares de red; modelo usa omie 2024-2025"
+      },
+      "ppa_es": {
+        "fv_p25_q3_2026_eur_mwh": 30.93,
+        "hibrido_fv_bess_p25_eur_mwh": 48.0,
+        "eolica_es": "sin precio eur/mwh publicado (indice europeo eolico 0.99 vs q3-2024)",
+        "pexapark_sep_2026_es": "-3.5 %",
+        "nota": "en espana la mayoria de ofertas fv son ya de activos operativos (sin adicionalidad)",
+        "fuente": "LevelTen PPA Index Q3 2026; pv-magazine.es 13-10-2026; elperiodicodelaenergia.com 23-10-2026",
+        "impacto": "fv 30.93 dentro del rango [30,40] (base 33.5); delta lcoa estimado < 1 %"
+      },
+      "capex_pem": {
+        "eho_2025_pem_eur_kw": 2196,
+        "desglose": "stack 494, bop 567, utilities 608, otros 527 (100 MW)",
+        "fuente": "European Hydrogen Observatory, electrolyser cost 2025",
+        "impacto": "consistente con base 2263 EUR/kW; sin cambio"
+      },
+      "capex_hb_modular": {
+        "novedad": "Casale contrato planta modular 100 t/d en Noruega (24-09-2026), sin capex publicado",
+        "impacto": "sin dato nuevo para 50 kg/h"
+      },
+      "rfnbo": {
+        "estado": "revision dirigida del acto delegado 2023/1184 anunciada en abril 2026, aun no publicada a 26-10-2026",
+        "propuestas": "adicionalidad: transicion 2028 -> 2032-2035; correlacion mensual mas alla de 2030; grandfathering; umbral 90 % -> 80 %",
+        "fuente": "hyzenergy.com 12-10-2026; Hydrogen Europe carta conjunta 08-07-2026",
+        "impacto": "potencialmente favorable (ppa de activos existentes); no aplicado al caso base hasta publicacion"
+      },
+      "ayudas": {
+        "estado": "sin convocatoria idae/perte erha de h2 abierta; aaas 2a convocatoria cerrada 03-06-2026; ehb 3a subasta: proyecto minimo 5 MWe",
+        "fuente": "idae.es; climate.ec.europa.eu if25",
+        "impacto": "sin cambio; piloto sigue no elegible"
+      },
+      "conclusion": "sin cambio material en lcoa ni riesgos nuevos"
+    }
+  },
+  "tareas": [
+    {
+      "id": "p1",
+      "tarea": "cotizacion de alquiler de suelo industrial (no nave) en El Prat/Zona Franca para 1500-5000 m2 con uso quimico",
+      "criterio_aceptacion": ">= 3 ofertas escritas con EUR/m2/mes y condiciones de uso; rango recalculado y LCOA v4 actualizado",
+      "entregable": "data/cotizaciones_suelo.csv + delta LCOA en informe v4",
+      "plazo_semanas": 4,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p2",
+      "tarea": "cotizaciones de proveedor HB+PSA modular 1-2 t/d y PEM 0.5-1 MW",
+      "criterio_aceptacion": ">= 2 cotizaciones por equipo con CAPEX, carga minima, rampa y tiempo de arranque; sustituyen rangos de literatura",
+      "entregable": "data/cotizaciones_equipos.csv + supuestos actualizados en simulacion v4",
+      "plazo_semanas": 8,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p3",
+      "tarea": "oferta indicativa de PPA pay-as-produced eolico+FV de 1-5 MW (via agregador) con planta nueva (adicionalidad) y garantias de origen horarias",
+      "criterio_aceptacion": ">= 2 ofertas con precio EUR/MWh, perfil horario y fecha de puesta en servicio de la planta",
+      "entregable": "data/ofertas_ppa.csv + verificacion art. 5/6 en informe v4",
+      "plazo_semanas": 8,
+      "estado": "pendiente",
+      "avance": [
+        "2026-10-26: benchmark mercado (no oferta): fv p25 30.93 EUR/MWh, hibrido fv+bess 48 EUR/MWh (LevelTen Q3 2026); oferta de fv nueva construccion en espana en descenso. Siguen faltando ofertas reales"
+      ]
+    },
+    {
+      "id": "p4",
+      "tarea": "dictamen juridico RFNBO: lectura A vs B para electricidad de auxiliares y aplicacion del art. 11 (en servicio antes de 1-1-2028)",
+      "criterio_aceptacion": "respuesta escrita de asesor o de la entidad certificadora (ISCC/REDcert/CertifHy) a 3 preguntas definidas",
+      "entregable": "docs/dictamen_rfnbo.md",
+      "plazo_semanas": 6,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p5",
+      "tarea": "ensayo/datos de fabricante E3 de arranque del HB (H2 perdido y parada minima)",
+      "criterio_aceptacion": "valor medido o garantizado de h_perdidas_arranque_hb y min_parada_hb_h con incertidumbre <= 25 %",
+      "entregable": "data/arranque_hb.json + re-optimizacion",
+      "plazo_semanas": 12,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p6",
+      "tarea": "plantilla operativa del piloto (FTE por turno) y perfil salarial",
+      "criterio_aceptacion": "organigrama con FTE justificados y coste por perfil con fuente (convenio quimico Cataluna)",
+      "entregable": "docs/plantilla_piloto.md; rango personal_fte/coste_fte sustituido",
+      "plazo_semanas": 4,
+      "estado": "en_curso",
+      "avance": [
+        "2026-10-26: tablas 2026 del XXI convenio general industria quimica (BOE-A-2026-3870): minimos brutos grupo 1-8 20311-53825 EUR/a; proceso continuo 25024-58538 EUR/a. Con cotizacion empresa ~30 % (supuesto) el coste de grupos 4-6 queda ~34-45 kEUR/a, coherente con rango coste_fte [37525, 60000]. Falta organigrama FTE y convenio provincial/empresa si aplica"
+      ]
+    },
+    {
+      "id": "p7",
+      "tarea": "consulta a e-distribucion: punto de conexion MT, distancia y presupuesto",
+      "criterio_aceptacion": "pliego de condiciones tecnico-economicas con EUR y km",
+      "entregable": "data/conexion_red.json",
+      "plazo_semanas": 10,
+      "estado": "pendiente"
+    },
+    {
+      "id": "p8",
+      "tarea": "validacion del modelo: reproducir un caso publicado (p. ej. Wang et al. iScience 2022 o EES 2026) con el nucleo v3",
+      "criterio_aceptacion": "LCOA reproducido dentro de +-10 % del publicado con sus supuestos",
+      "entregable": "validacion/caso_referencia.md + script",
+      "plazo_semanas": 3,
+      "estado": "pendiente"
+    },
+    {
+      "id": "h1",
+      "tarea": "costes faltantes, rfnbo y mc re-optimizado (v3)",
+      "criterio_aceptacion": "todos los parametros con fuente y rango; json sin valores nulos",
+      "entregable": "resultados.json v3",
+      "plazo_semanas": 0,
+      "estado": "hecho"
+    }
+  ],
+  "riesgos": [
+    {
+      "riesgo": "alquiler de suelo (rentas de nave 6.5-11 EUR/m2/mes) es el mayor coste nuevo (~700 EUR/t) y hace inviable la fv en suelo alquilado (~19 000 EUR/t)",
+      "impacto": "alto",
+      "mitigacion": "p1: cotizar suelo; fv en cubierta propia o ppa"
+    },
+    {
+      "riesgo": "costes fijos (personal + alquiler) ~1100-1300 EUR/t por la escala de 50 kg/h",
+      "impacto": "alto",
+      "mitigacion": "compartir personal/emplazamiento con instalacion existente; escalar"
+    },
+    {
+      "riesgo": "adicionalidad del ppa: requiere planta nueva salvo entrada en servicio antes de 1-1-2028",
+      "impacto": "alto",
+      "mitigacion": "p3, p4; calendario; vigilar revision del acto delegado rfnbo (posible transicion a 2032-2035), aun no publicada",
+      "evidencia": "2026-10-26: mayoria de ofertas ppa fv en espana son de activos operativos; ppa de planta nueva mas escaso"
+    },
+    {
+      "riesgo": "interpretacion rfnbo de la electricidad de auxiliares tomada de red (lectura a vs b) en fv in situ",
+      "impacto": "medio",
+      "mitigacion": "p4; bateria o ppa para auxiliares"
+    },
+    {
+      "riesgo": "perfil ppa nacional (energy-charts) puede sobreestimar la cobertura horaria de un ppa de una planta concreta",
+      "impacto": "medio",
+      "mitigacion": "p3: perfil horario real de la planta"
+    },
+    {
+      "riesgo": "ayudas: h2 pioneros cerrado; hydrogen bank exige >= 5 mwe",
+      "impacto": "medio",
+      "mitigacion": "no incluidas en el caso base"
+    },
+    {
+      "riesgo": "sin datos experimentales (e2); capex de equipos a escala piloto inciertos",
+      "impacto": "alto",
+      "mitigacion": "p2, p5, p8"
+    }
+  ],
+  "decisiones": [
+    {
+      "decision": "escenario preferente: ppa + red; con perfil nacional cumple rfnbo mensual y horario sin coste adicional",
+      "tipo": "resultado_modelo",
+      "estado": "provisional"
+    },
+    {
+      "decision": "ayudas y venta de o2 fuera del caso base",
+      "tipo": "criterio_prudencia",
+      "estado": "hecho"
+    },
+    {
+      "decision": "eolica in situ descartada",
+      "tipo": "supuesto_de_diseno",
+      "estado": "hecho"
+    },
+    {
+      "decision": "lectura a (toda la electricidad) como criterio rfnbo conservador; lectura b informada",
+      "tipo": "supuesto_regulatorio",
+      "estado": "provisional"
+    },
+    {
+      "decision": "v2 conservada en v2/",
+      "tipo": "gestion",
+      "estado": "hecho"
+    }
+  ],
+  "proximo_paso": "p1 y p3 en paralelo (suelo y ppa: ~60 % del lcoa del escenario ppa); completar p6 (organigrama fte); despues p2 y p4; re-optimizar en v4 tras publicacion de la revision rfnbo"
+}
