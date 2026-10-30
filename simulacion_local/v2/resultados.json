@@ -1,0 +1,1337 @@
+{
+  "meta": {
+    "proyecto": "cero_a",
+    "version": "v2",
+    "version_anterior": "v1/ (perfiles sinteticos, sin costes)",
+    "nivel_evidencia": "e2_validacion_concepto",
+    "fecha": "2026-10-18",
+    "emplazamiento": {
+      "nombre": "el_prat_de_llobregat_barcelona",
+      "lat": 41.3,
+      "lon": 2.08
+    },
+    "scripts": [
+      "datos_cero_a.py",
+      "simulacion_cero_a_v2.py"
+    ],
+    "datos_experimentales": [],
+    "n_monte_carlo": 300,
+    "anos_optimizacion": {
+      "meteo": [
+        2022,
+        2023
+      ],
+      "precios_omie": [
+        2024,
+        2025
+      ],
+      "nota": "meteo 2022-2023 emparejada con precios 2024-2025 (coherente con ppa y peajes 2025); estres con 2019-2023 emparejado"
+    },
+    "fuentes_series": {
+      "fv": "PVGIS v5.3 seriescalc (JRC), PVGIS-SARAH3 + ERA5, 2014-2023, c-Si 1 kWp, perdidas 14 %, 38 deg/2 deg optimos",
+      "eolica": "ERA5 via Open-Meteo Historical Weather API (viento 10 y 100 m), 2014-2023; celda cercana 41.25N 2.00E (base) y celda tierra 41.50N 2.00E; curva Enercon E-53/800 (OEDB/windpowerlib), buje 73 m",
+      "perfil_ppa": "CF horario nacional Espana eolica terrestre y solar 2024-2025 (Energy-Charts public_power/installed_power; primaria REE/ENTSO-E); en anos 2019-2023 se usa el perfil local como proxy",
+      "precio": "OMIE diario zona ES via Energy-Charts API (Fraunhofer ISE), 2019-2025; licencia uso privado/interno",
+      "renewables_ninja": "no usado: la API requiere token (credencial)"
+    },
+    "tiempo_ejecucion_s": 40.6,
+    "moneda": "EUR 2024 (USD->EUR 1/1.0824, BCE media 2024)",
+    "advertencia": "resultados de modelo con supuestos de literatura; no validados experimentalmente"
+  },
+  "objetivo": "minimizar el lcoa de un piloto de 50 kg/h nh3 en el prat eligiendo fv/eolica/ppa, pem, buffer h2, bateria y carga minima hb, con series horarias reales, y compararlo con amoniaco gris",
+  "datos_clave": {
+    "supuestos_tecnicos": [
+      {
+        "parametro": "e_electrolizador_kwh_kg_h2",
+        "base": 55.0,
+        "rango": [
+          50.0,
+          65.0
+        ],
+        "unidad": "kWh/kg H2",
+        "fuente": "IRENA (2020) KPI PEM sistema 50-83; estado del arte 52-56"
+      },
+      {
+        "parametro": "carga_min_electrolizador",
+        "base": 0.05,
+        "rango": [
+          0.05,
+          0.1
+        ],
+        "unidad": "fraccion",
+        "fuente": "IRENA (2020) 5-120 %; OIES EL47 (2022) 0-10 %"
+      },
+      {
+        "parametro": "conversion_global_lazo",
+        "base": 0.98,
+        "rango": [
+          0.97,
+          0.99
+        ],
+        "unidad": "fraccion",
+        "fuente": "Rouwenhorst et al. 2021 via Wang et al. iScience 2022"
+      },
+      {
+        "parametro": "e_lazo_hb_kwh_kg_nh3",
+        "base": 2.0,
+        "rango": [
+          0.64,
+          3.62
+        ],
+        "unidad": "kWh/kg NH3",
+        "fuente": "Rouwenhorst et al. RSER 2019 (3.62 pequena escala; NFUEL ~2); Ikaheimo et al. IJHE 2018 (0.64)"
+      },
+      {
+        "parametro": "e_psa_kwh_nm3_n2",
+        "base": 0.45,
+        "rango": [
+          0.3,
+          0.6
+        ],
+        "unidad": "kWh/Nm3",
+        "fuente": "Messer, ficha PSA 99.9 %"
+      },
+      {
+        "parametro": "rampa_hb_frac_h",
+        "base": 0.2,
+        "rango": [
+          0.1,
+          0.3
+        ],
+        "unidad": "fraccion/h",
+        "fuente": "ICAE 2021 (Australia): HB flexible 20 %/h"
+      },
+      {
+        "parametro": "eficiencia_compresor_h2",
+        "base": 0.6,
+        "rango": [
+          0.5,
+          0.75
+        ],
+        "unidad": "isoterma",
+        "fuente": "supuesto; contraste DOE Record 9013"
+      },
+      {
+        "parametro": "rte_bateria",
+        "base": 0.85,
+        "rango": [
+          0.8,
+          0.9
+        ],
+        "unidad": "fraccion",
+        "fuente": "NREL ATB 2024: 85 % (rango supuesto)"
+      },
+      {
+        "parametro": "h_perdidas_arranque_hb",
+        "base": 6.0,
+        "rango": [
+          2.0,
+          12.0
+        ],
+        "unidad": "h a carga minima sin NH3 por arranque",
+        "fuente": "SUPUESTO sin fuente cuantitativa (calentamiento/estabilizacion); rango amplio"
+      },
+      {
+        "parametro": "min_parada_hb_h",
+        "base": 6.0,
+        "rango": [
+          1.0,
+          24.0
+        ],
+        "unidad": "h",
+        "fuente": "SUPUESTO; Joule 2023 (dynamic operation) usa paradas planificadas >= 3 dias"
+      }
+    ],
+    "supuestos_economicos": [
+      {
+        "parametro": "capex_fv_eur_kwp",
+        "base": 800.0,
+        "rango": [
+          619.919,
+          1000.0
+        ],
+        "unidad": "EUR/kWp",
+        "fuente": "IRENA RPGC 2023: Espana FV utility 671 USD/kW (2023); prima escala piloto = supuesto"
+      },
+      {
+        "parametro": "om_fv_eur_kwp_a",
+        "base": 12.0,
+        "rango": [
+          9.516,
+          18.0
+        ],
+        "unidad": "EUR/kWp/a",
+        "fuente": "IRENA RPGC 2023: O&M FV global 10.3 USD/kW/a; prima piloto = supuesto"
+      },
+      {
+        "parametro": "capex_eol_eur_kw",
+        "base": 1400.0,
+        "rango": [
+          1071.693,
+          1800.0
+        ],
+        "unidad": "EUR/kW",
+        "fuente": "IRENA RPGC 2023: eolica terrestre global 1160 USD/kW; prima Europa/turbina pequena = supuesto"
+      },
+      {
+        "parametro": "om_eol_eur_kw_a",
+        "base": 40.0,
+        "rango": [
+          30.0,
+          50.0
+        ],
+        "unidad": "EUR/kW/a",
+        "fuente": "rango SUPUESTO (orden de magnitud NREL ATB eolica terrestre)"
+      },
+      {
+        "parametro": "capex_pem_eur_kw",
+        "base": 2263.489,
+        "rango": [
+          1755.358,
+          3000.0
+        ],
+        "unidad": "EUR/kW instalado (incl. EPC)",
+        "fuente": "IEA GHR 2024: 2000-2450 USD/kW fuera de China (PEM extremo alto); IEA 2025: 1900-2500; max piloto = supuesto"
+      },
+      {
+        "parametro": "om_pem_frac",
+        "base": 0.03,
+        "rango": [
+          0.02,
+          0.04
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "IEA GHR 2024 Assumptions annex: 3 %"
+      },
+      {
+        "parametro": "vida_stack_h",
+        "base": 50000.0,
+        "rango": [
+          50000.0,
+          95000.0
+        ],
+        "unidad": "h",
+        "fuente": "IEA GHR 2024 annex: 50 000 h (hasta 95 000 h)"
+      },
+      {
+        "parametro": "frac_stack_capex",
+        "base": 0.35,
+        "rango": [
+          0.3,
+          0.45
+        ],
+        "unidad": "fraccion",
+        "fuente": "IRENA (2020) Green H2 cost reduction: stack 30-45 % del coste"
+      },
+      {
+        "parametro": "capex_buffer_eur_kg",
+        "base": 866.58,
+        "rango": [
+          535.0,
+          1000.0
+        ],
+        "unidad": "EUR/kg H2 util",
+        "fuente": "Haber-Bosch 2.0, EES 2026, Tabla 2: 26 EUR/kWh (=867 EUR/kg); ENTEC/Fraunhofer 2022: ~535 EUR/kg tanques; max supuesto"
+      },
+      {
+        "parametro": "capex_psa_eur",
+        "base": 183000.0,
+        "rango": [
+          126000.0,
+          222000.0
+        ],
+        "unidad": "EUR (42 kg N2/h)",
+        "fuente": "EES 2026 Tabla 2: ASU 1720 EUR/(kg N2/h) a 20 t/d, escalado exp. 0.6-0.8 (base 0.67, Malmali et al. Processes 2018)"
+      },
+      {
+        "parametro": "capex_hb_eur",
+        "base": 1090000.0,
+        "rango": [
+          750000.0,
+          1900000.0
+        ],
+        "unidad": "EUR (50 kg NH3/h)",
+        "fuente": "EES 2026 Tabla 2: 8600 EUR/(kg NH3/h) a 20 t/d escalado exp 0.6-0.8; max: Malmali et al. 2018 (3 t/d = 3.8 M USD) escalado"
+      },
+      {
+        "parametro": "om_hb_psa_frac",
+        "base": 0.03,
+        "rango": [
+          0.02,
+          0.05
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "Pozo et al. 2022 (3 %); Wang et al. iScience 2022 (5 %)"
+      },
+      {
+        "parametro": "capex_bat_eur_kwh",
+        "base": 400.0,
+        "rango": [
+          252.217,
+          485.033
+        ],
+        "unidad": "EUR/kWh (4 h)",
+        "fuente": "IRENA RPGC 2023: 273 USD/kWh (2023); NREL ATB 2024: 525 USD/kWh (4 h, USD 2022)"
+      },
+      {
+        "parametro": "om_bat_frac",
+        "base": 0.025,
+        "rango": [
+          0.02,
+          0.03
+        ],
+        "unidad": "fraccion CAPEX/a",
+        "fuente": "NREL ATB 2024 (FOM ~2.5 %); rango supuesto"
+      },
+      {
+        "parametro": "wacc",
+        "base": 0.07,
+        "rango": [
+          0.05,
+          0.1
+        ],
+        "unidad": "real",
+        "fuente": "SUPUESTO: renovables Europa bajo (IRENA Cost of financing 2023) + prima primera planta"
+      },
+      {
+        "parametro": "ppa_fv_eur_mwh",
+        "base": 33.5,
+        "rango": [
+          30.0,
+          40.0
+        ],
+        "unidad": "EUR/MWh",
+        "fuente": "LevelTen PPA Index Espana Q3 2025 P25 solar 33.5; Q4 2025 32.5; ofertas < 30"
+      },
+      {
+        "parametro": "ppa_eol_eur_mwh",
+        "base": 53.0,
+        "rango": [
+          45.0,
+          60.0
+        ],
+        "unidad": "EUR/MWh",
+        "fuente": "LevelTen PPA Index Espana Q3 2025 P25 eolica 53; rango supuesto"
+      },
+      {
+        "parametro": "agua_eur_m3",
+        "base": 2.0,
+        "rango": [
+          1.5,
+          3.0
+        ],
+        "unidad": "EUR/m3",
+        "fuente": "Wang et al. iScience 2022: 2.15 USD/m3 (Toronto); rango supuesto Barcelona"
+      }
+    ],
+    "vidas_utiles_anos": {
+      "fv": 25,
+      "eol": 25,
+      "pem": 20,
+      "buffer": 20,
+      "psa": 20,
+      "hb": 20,
+      "bat": 15
+    },
+    "tarifa_red": "6.1TD 2025: peajes (BOE-A-2024-26218) + cargos segmento 3 (Orden TED/1487/2024); IEE no incluido (posible exencion procesos electroliticos, Ley 38/1992); festivos no modelados",
+    "escenarios": {
+      "aislado_fv_eol_bat": {
+        "diseno_optimo": {
+          "fv_kwp": 3103.354,
+          "eol_kw": 396.16,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 1294.242,
+          "buffer_h": 25.594,
+          "bat_kwh": 1614.284,
+          "carga_min_hb": 0.213,
+          "umbral_eur_mwh": -1000000000.0,
+          "modo": 0.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 2751.29,
+          "nh3_t_ano": 365.464,
+          "costes_eur_ano": {
+            "fv": 250280.6,
+            "eolica": 63439.023,
+            "pem": 422210.456,
+            "buffer_h2": 22983.516,
+            "psa_hb": 158352.194,
+            "bateria": 87038.705,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 0.0,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1193.908
+          },
+          "coste_eur_t": {
+            "fv": 684.829,
+            "eolica": 173.585,
+            "pem": 1155.271,
+            "buffer_h2": 62.889,
+            "psa_hb": 433.29,
+            "bateria": 238.159,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 0.0,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.267
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.387,
+          "cf_hb": 0.834,
+          "cf_pem": 0.322,
+          "arranques_hb_ano": 9.006,
+          "h2_perdido_arranques_t_ano": 0.095,
+          "import_red_mwh_ano": 0.0,
+          "cuota_electricidad_renovable_contratada_horaria": 1.0,
+          "excedente_frac": 0.151,
+          "potencia_contratada_kw": 0.0
+        },
+        "lcoa_p5_p50_p95": {
+          "p5": 2629.616,
+          "p50": 3161.286,
+          "p95": 4419.968
+        },
+        "lcoa_por_ano_meteo_y_precio": {
+          "2019": 2697.229,
+          "2020": 2770.496,
+          "2021": 2859.855,
+          "2022": 2824.799,
+          "2023": 2683.48
+        },
+        "lcoa_historico_2019_2023_mismo_diseno": 2763.918,
+        "lcoa_si_vende_excedentes_omie": "",
+        "lcoa_met2022_precios_2024": "",
+        "lcoa_met2023_precios_2025": "",
+        "importancia_spearman": {
+          "e_lazo_hb_kwh_kg_nh3": 0.615,
+          "wacc": 0.366,
+          "capex_pem_eur_kw": 0.365,
+          "capex_hb_eur": 0.165,
+          "capex_fv_eur_kwp": 0.161,
+          "om_pem_frac": 0.141,
+          "capex_bat_eur_kwh": 0.122,
+          "e_electrolizador_kwh_kg_h2": 0.118
+        },
+        "evaluaciones_optimizador": 4392
+      },
+      "aislado_solo_fv_bat": {
+        "diseno_optimo": {
+          "fv_kwp": 3401.324,
+          "eol_kw": 0.0,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 1269.603,
+          "buffer_h": 24.93,
+          "bat_kwh": 1763.446,
+          "carga_min_hb": 0.222,
+          "umbral_eur_mwh": -1000000000.0,
+          "modo": 0.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 2766.994,
+          "nh3_t_ano": 348.465,
+          "costes_eur_ano": {
+            "fv": 274311.389,
+            "eolica": 0.0,
+            "pem": 412922.868,
+            "buffer_h2": 22386.961,
+            "psa_hb": 158352.194,
+            "bateria": 95081.223,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 0.0,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1145.359
+          },
+          "coste_eur_t": {
+            "fv": 787.2,
+            "eolica": 0.0,
+            "pem": 1184.977,
+            "buffer_h2": 64.245,
+            "psa_hb": 454.428,
+            "bateria": 272.857,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 0.0,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.287
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.454,
+          "cf_hb": 0.796,
+          "cf_pem": 0.315,
+          "arranques_hb_ano": 43.53,
+          "h2_perdido_arranques_t_ano": 0.477,
+          "import_red_mwh_ano": 0.0,
+          "cuota_electricidad_renovable_contratada_horaria": 1.0,
+          "excedente_frac": 0.18,
+          "potencia_contratada_kw": 0.0
+        },
+        "lcoa_p5_p50_p95": {
+          "p5": 2637.147,
+          "p50": 3252.007,
+          "p95": 5352.592
+        },
+        "lcoa_por_ano_meteo_y_precio": {
+          "2019": 2751.569,
+          "2020": 2826.172,
+          "2021": 2900.294,
+          "2022": 2839.639,
+          "2023": 2699.903
+        },
+        "lcoa_historico_2019_2023_mismo_diseno": 2800.515,
+        "lcoa_si_vende_excedentes_omie": "",
+        "lcoa_met2022_precios_2024": "",
+        "lcoa_met2023_precios_2025": "",
+        "importancia_spearman": {
+          "e_lazo_hb_kwh_kg_nh3": 0.718,
+          "capex_pem_eur_kw": 0.318,
+          "wacc": 0.272,
+          "capex_bat_eur_kwh": 0.137,
+          "capex_fv_eur_kwp": 0.133,
+          "capex_hb_eur": 0.122,
+          "carga_min_electrolizador": 0.12,
+          "om_pem_frac": 0.116
+        },
+        "evaluaciones_optimizador": 3660
+      },
+      "red_auxiliares_fv_eol": {
+        "diseno_optimo": {
+          "fv_kwp": 3126.457,
+          "eol_kw": 0.107,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 1373.055,
+          "buffer_h": 26.385,
+          "bat_kwh": 0.627,
+          "carga_min_hb": 0.228,
+          "umbral_eur_mwh": -1000000000.0,
+          "modo": 1.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 2575.339,
+          "nh3_t_ano": 357.8,
+          "costes_eur_ano": {
+            "fv": 252143.812,
+            "eolica": 17.19,
+            "pem": 443112.443,
+            "buffer_h2": 23693.695,
+            "psa_hb": 158352.194,
+            "bateria": 33.795,
+            "red_energia_omie": 33236.554,
+            "red_peajes_cargos": 9699.993,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1167.284
+          },
+          "coste_eur_t": {
+            "fv": 704.706,
+            "eolica": 0.048,
+            "pem": 1238.435,
+            "buffer_h2": 66.22,
+            "psa_hb": 442.572,
+            "bateria": 0.094,
+            "red_energia_omie": 92.891,
+            "red_peajes_cargos": 27.11,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.262
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.38,
+          "cf_hb": 0.817,
+          "cf_pem": 0.297,
+          "arranques_hb_ano": 0.5,
+          "h2_perdido_arranques_t_ano": 0.006,
+          "import_red_mwh_ano": 409.097,
+          "cuota_electricidad_renovable_contratada_horaria": 0.908,
+          "excedente_frac": 0.188,
+          "potencia_contratada_kw": 115.099
+        },
+        "lcoa_p5_p50_p95": {
+          "p5": 2391.441,
+          "p50": 2811.994,
+          "p95": 3301.885
+        },
+        "lcoa_por_ano_meteo_y_precio": {
+          "2019": 2504.9,
+          "2020": 2566.527,
+          "2021": 2722.792,
+          "2022": 2752.001,
+          "2023": 2537.147
+        },
+        "lcoa_historico_2019_2023_mismo_diseno": 2612.702,
+        "lcoa_si_vende_excedentes_omie": 2498.38,
+        "lcoa_met2022_precios_2024": 2637.405,
+        "lcoa_met2023_precios_2025": 2518.583,
+        "importancia_spearman": {
+          "wacc": 0.579,
+          "capex_pem_eur_kw": 0.485,
+          "e_electrolizador_kwh_kg_h2": 0.422,
+          "capex_hb_eur": 0.283,
+          "om_pem_frac": 0.241,
+          "capex_fv_eur_kwp": 0.216,
+          "e_lazo_hb_kwh_kg_nh3": 0.139,
+          "frac_stack_capex": 0.093
+        },
+        "evaluaciones_optimizador": 4032
+      },
+      "ppa_fv_eol_red": {
+        "diseno_optimo": {
+          "fv_kwp": 0.0,
+          "eol_kw": 0.0,
+          "ppa_fv_kw": 1033.065,
+          "ppa_eol_kw": 2794.564,
+          "pem_kw": 503.339,
+          "buffer_h": 1.676,
+          "bat_kwh": 0.0,
+          "carga_min_hb": 0.2,
+          "umbral_eur_mwh": -1000000000.0,
+          "modo": 1.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 1848.504,
+          "nh3_t_ano": 389.425,
+          "costes_eur_ano": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 203239.462,
+            "buffer_h2": 1504.643,
+            "psa_hb": 158352.194,
+            "bateria": 0.0,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 83988.851,
+            "ppa": 329584.507,
+            "venta_excedentes": -58086.259,
+            "agua": 1270.686
+          },
+          "coste_eur_t": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 521.896,
+            "buffer_h2": 3.864,
+            "psa_hb": 406.63,
+            "bateria": 0.0,
+            "red_energia_omie": 0.0,
+            "red_peajes_cargos": 215.674,
+            "ppa": 846.336,
+            "venta_excedentes": -149.159,
+            "agua": 3.263
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.274,
+          "cf_hb": 0.889,
+          "cf_pem": 0.881,
+          "arranques_hb_ano": 3.502,
+          "h2_perdido_arranques_t_ano": 0.038,
+          "import_red_mwh_ano": 0.0,
+          "cuota_electricidad_renovable_contratada_horaria": 1.0,
+          "excedente_frac": 0.301,
+          "potencia_contratada_kw": 618.536
+        },
+        "lcoa_p5_p50_p95": {
+          "p5": 1750.065,
+          "p50": 1996.804,
+          "p95": 2280.52
+        },
+        "lcoa_por_ano_meteo_y_precio": {},
+        "lcoa_historico_2019_2023_mismo_diseno": "",
+        "lcoa_si_vende_excedentes_omie": "",
+        "lcoa_met2022_precios_2024": 1862.847,
+        "lcoa_met2023_precios_2025": 1833.264,
+        "importancia_spearman": {
+          "e_electrolizador_kwh_kg_h2": 0.556,
+          "capex_hb_eur": 0.449,
+          "wacc": 0.362,
+          "capex_pem_eur_kw": 0.337,
+          "om_pem_frac": 0.228,
+          "ppa_eol_eur_mwh": 0.201,
+          "e_lazo_hb_kwh_kg_nh3": 0.174,
+          "vida_stack_h": -0.138
+        },
+        "evaluaciones_optimizador": 2220
+      },
+      "red_spot_omie_no_verde": {
+        "diseno_optimo": {
+          "fv_kwp": 0.0,
+          "eol_kw": 0.0,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 498.939,
+          "buffer_h": 3.823,
+          "bat_kwh": 0.0,
+          "carga_min_hb": 0.201,
+          "umbral_eur_mwh": 135.978,
+          "modo": 2.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 1820.994,
+          "nh3_t_ano": 411.809,
+          "costes_eur_ano": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 205738.155,
+            "buffer_h2": 3432.848,
+            "psa_hb": 158352.194,
+            "bateria": 0.0,
+            "red_energia_omie": 299229.202,
+            "red_peajes_cargos": 81801.276,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1347.889
+          },
+          "coste_eur_t": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 499.596,
+            "buffer_h2": 8.336,
+            "psa_hb": 384.528,
+            "bateria": 0.0,
+            "red_energia_omie": 726.622,
+            "red_peajes_cargos": 198.639,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.273
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.308,
+          "cf_hb": 0.94,
+          "cf_pem": 0.942,
+          "arranques_hb_ano": 25.017,
+          "h2_perdido_arranques_t_ano": 0.273,
+          "import_red_mwh_ano": 5071.876,
+          "cuota_electricidad_renovable_contratada_horaria": 0.0,
+          "excedente_frac": 0.0,
+          "potencia_contratada_kw": 614.037
+        },
+        "lcoa_p5_p50_p95": {
+          "p5": 1720.95,
+          "p50": 1964.126,
+          "p95": 2232.221
+        },
+        "lcoa_por_ano_meteo_y_precio": {
+          "2019": 1636.932,
+          "2020": 1469.613,
+          "2021": 2258.547,
+          "2022": 4285.862,
+          "2023": 2133.513
+        },
+        "lcoa_historico_2019_2023_mismo_diseno": 2013.024,
+        "lcoa_si_vende_excedentes_omie": "",
+        "lcoa_met2022_precios_2024": 1808.2,
+        "lcoa_met2023_precios_2025": 1833.036,
+        "importancia_spearman": {
+          "e_electrolizador_kwh_kg_h2": 0.576,
+          "capex_hb_eur": 0.445,
+          "wacc": 0.361,
+          "capex_pem_eur_kw": 0.348,
+          "om_pem_frac": 0.228,
+          "e_lazo_hb_kwh_kg_nh3": 0.207,
+          "vida_stack_h": -0.126,
+          "frac_stack_capex": 0.118
+        },
+        "evaluaciones_optimizador": 2496
+      }
+    },
+    "mejor_escenario_verde": "ppa_fv_eol_red",
+    "tornado_mejor_escenario": {
+      "e_electrolizador_kwh_kg_h2": [
+        1764.211,
+        2154.464
+      ],
+      "capex_hb_eur": [
+        1739.898,
+        2107.239
+      ],
+      "capex_pem_eur_kw": [
+        1731.343,
+        2018.322
+      ],
+      "wacc": [
+        1760.371,
+        1992.17
+      ],
+      "e_lazo_hb_kwh_kg_nh3": [
+        1750.24,
+        1972.895
+      ],
+      "ppa_eol_eur_mwh": [
+        1756.702,
+        1929.98
+      ],
+      "om_hb_psa_frac": [
+        1815.814,
+        1913.882
+      ],
+      "vida_stack_h": [
+        1848.504,
+        1773.675
+      ],
+      "frac_stack_capex": [
+        1825.936,
+        1893.639
+      ],
+      "om_pem_frac": [
+        1819.248,
+        1877.76
+      ]
+    },
+    "mejor_escenario_in_situ": "red_auxiliares_fv_eol",
+    "barridos_mejor_in_situ": {
+      "buffer": [
+        {
+          "buffer_h": 0,
+          "lcoa_eur_t": 7628.079,
+          "nh3_t_ano": 107.291,
+          "arranques_hb_ano": 375.757
+        },
+        {
+          "buffer_h": 6,
+          "lcoa_eur_t": 3827.804,
+          "nh3_t_ano": 224.522,
+          "arranques_hb_ano": 34.524
+        },
+        {
+          "buffer_h": 12,
+          "lcoa_eur_t": 3138.58,
+          "nh3_t_ano": 282.339,
+          "arranques_hb_ano": 10.007
+        },
+        {
+          "buffer_h": 24,
+          "lcoa_eur_t": 2584.304,
+          "nh3_t_ano": 355.519,
+          "arranques_hb_ano": 1.001
+        },
+        {
+          "buffer_h": 48,
+          "lcoa_eur_t": 2617.832,
+          "nh3_t_ano": 359.62,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "buffer_h": 72,
+          "lcoa_eur_t": 2677.762,
+          "nh3_t_ano": 359.62,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "buffer_h": 96,
+          "lcoa_eur_t": 2737.693,
+          "nh3_t_ano": 359.62,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "buffer_h": 120,
+          "lcoa_eur_t": 2797.623,
+          "nh3_t_ano": 359.62,
+          "arranques_hb_ano": 0.5
+        }
+      ],
+      "carga_min_hb": [
+        {
+          "carga_min": 0.1,
+          "lcoa_eur_t": 2576.031,
+          "nh3_t_ano": 357.71,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "carga_min": 0.2,
+          "lcoa_eur_t": 2575.517,
+          "nh3_t_ano": 357.773,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "carga_min": 0.3,
+          "lcoa_eur_t": 2576.873,
+          "nh3_t_ano": 357.574,
+          "arranques_hb_ano": 3.002
+        },
+        {
+          "carga_min": 0.4,
+          "lcoa_eur_t": 2585.055,
+          "nh3_t_ano": 356.439,
+          "arranques_hb_ano": 12.509
+        },
+        {
+          "carga_min": 0.5,
+          "lcoa_eur_t": 2601.815,
+          "nh3_t_ano": 354.155,
+          "arranques_hb_ano": 26.018
+        },
+        {
+          "carga_min": 0.6,
+          "lcoa_eur_t": 2630.224,
+          "nh3_t_ano": 350.382,
+          "arranques_hb_ano": 44.53
+        },
+        {
+          "carga_min": 0.8,
+          "lcoa_eur_t": 2731.426,
+          "nh3_t_ano": 337.875,
+          "arranques_hb_ano": 90.562
+        }
+      ],
+      "penalizacion_arranque_h": [
+        {
+          "h": 0,
+          "lcoa_eur_t": 2575.093
+        },
+        {
+          "h": 2,
+          "lcoa_eur_t": 2575.175
+        },
+        {
+          "h": 6,
+          "lcoa_eur_t": 2575.339
+        },
+        {
+          "h": 12,
+          "lcoa_eur_t": 2575.585
+        },
+        {
+          "h": 24,
+          "lcoa_eur_t": 2576.078
+        }
+      ],
+      "parada_minima_h": [
+        {
+          "h": 1,
+          "lcoa_eur_t": 2575.339,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "h": 6,
+          "lcoa_eur_t": 2575.339,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "h": 24,
+          "lcoa_eur_t": 2575.339,
+          "arranques_hb_ano": 0.5
+        },
+        {
+          "h": 72,
+          "lcoa_eur_t": 2575.339,
+          "arranques_hb_ano": 0.5
+        }
+      ]
+    },
+    "interanual_meteo_2014_2023_mejor_in_situ_precios_2024": {
+      "2014": {
+        "lcoa_eur_t": 2632.371,
+        "nh3_t_ano": 347.993
+      },
+      "2015": {
+        "lcoa_eur_t": 2567.548,
+        "nh3_t_ano": 358.173
+      },
+      "2016": {
+        "lcoa_eur_t": 2640.551,
+        "nh3_t_ano": 347.125
+      },
+      "2017": {
+        "lcoa_eur_t": 2561.246,
+        "nh3_t_ano": 359.015
+      },
+      "2018": {
+        "lcoa_eur_t": 2650.495,
+        "nh3_t_ano": 345.676
+      },
+      "2019": {
+        "lcoa_eur_t": 2535.766,
+        "nh3_t_ano": 362.978
+      },
+      "2020": {
+        "lcoa_eur_t": 2615.867,
+        "nh3_t_ano": 351.018
+      },
+      "2021": {
+        "lcoa_eur_t": 2679.395,
+        "nh3_t_ano": 341.437
+      },
+      "2022": {
+        "lcoa_eur_t": 2637.405,
+        "nh3_t_ano": 347.734
+      },
+      "2023": {
+        "lcoa_eur_t": 2506.532,
+        "nh3_t_ano": 367.617
+      }
+    },
+    "barrido_buffer_mejor": [
+      {
+        "buffer_h": 0,
+        "lcoa_eur_t": 1862.598,
+        "nh3_t_ano": 383.262,
+        "arranques_hb_ano": 12.509
+      },
+      {
+        "buffer_h": 6,
+        "lcoa_eur_t": 1856.766,
+        "nh3_t_ano": 389.915,
+        "arranques_hb_ano": 1.001
+      },
+      {
+        "buffer_h": 12,
+        "lcoa_eur_t": 1870.44,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "buffer_h": 24,
+        "lcoa_eur_t": 1898.075,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "buffer_h": 48,
+        "lcoa_eur_t": 1953.344,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "buffer_h": 72,
+        "lcoa_eur_t": 2008.614,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "buffer_h": 96,
+        "lcoa_eur_t": 2063.884,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "buffer_h": 120,
+        "lcoa_eur_t": 2119.154,
+        "nh3_t_ano": 389.945,
+        "arranques_hb_ano": 0.5
+      }
+    ],
+    "barrido_carga_min_hb_mejor": [
+      {
+        "carga_min": 0.1,
+        "lcoa_eur_t": 1847.468,
+        "nh3_t_ano": 389.654,
+        "arranques_hb_ano": 0.5
+      },
+      {
+        "carga_min": 0.2,
+        "lcoa_eur_t": 1848.503,
+        "nh3_t_ano": 389.425,
+        "arranques_hb_ano": 3.502
+      },
+      {
+        "carga_min": 0.3,
+        "lcoa_eur_t": 1856.027,
+        "nh3_t_ano": 387.546,
+        "arranques_hb_ano": 13.009
+      },
+      {
+        "carga_min": 0.4,
+        "lcoa_eur_t": 1877.038,
+        "nh3_t_ano": 382.387,
+        "arranques_hb_ano": 36.025
+      },
+      {
+        "carga_min": 0.5,
+        "lcoa_eur_t": 1905.925,
+        "nh3_t_ano": 375.853,
+        "arranques_hb_ano": 62.042
+      },
+      {
+        "carga_min": 0.6,
+        "lcoa_eur_t": 1961.267,
+        "nh3_t_ano": 363.629,
+        "arranques_hb_ano": 99.568
+      },
+      {
+        "carga_min": 0.8,
+        "lcoa_eur_t": 2116.736,
+        "nh3_t_ano": 333.47,
+        "arranques_hb_ano": 182.125
+      }
+    ],
+    "barrido_penalizacion_arranque_mejor": [
+      {
+        "h_perdidas": 0,
+        "lcoa_eur_t": 1847.506,
+        "arranques_hb_ano": 3.502
+      },
+      {
+        "h_perdidas": 2,
+        "lcoa_eur_t": 1847.839,
+        "arranques_hb_ano": 3.502
+      },
+      {
+        "h_perdidas": 6,
+        "lcoa_eur_t": 1848.504,
+        "arranques_hb_ano": 3.502
+      },
+      {
+        "h_perdidas": 12,
+        "lcoa_eur_t": 1849.502,
+        "arranques_hb_ano": 3.502
+      },
+      {
+        "h_perdidas": 24,
+        "lcoa_eur_t": 1851.502,
+        "arranques_hb_ano": 3.502
+      }
+    ],
+    "reoptimizado_meteo_y_precios_historicos_2019_2023": {
+      "red_auxiliares_fv_eol": {
+        "diseno_optimo": {
+          "fv_kwp": 2967.21,
+          "eol_kw": 413.971,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 1347.408,
+          "buffer_h": 26.328,
+          "bat_kwh": 0.251,
+          "carga_min_hb": 0.296,
+          "umbral_eur_mwh": -1000000000.0,
+          "modo": 1.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 2610.571,
+          "nh3_t_ano": 368.782,
+          "costes_eur_ano": {
+            "fv": 239300.766,
+            "eolica": 66291.176,
+            "pem": 437615.097,
+            "buffer_h2": 23642.344,
+            "psa_hb": 158352.194,
+            "bateria": 13.523,
+            "red_energia_omie": 27703.782,
+            "red_peajes_cargos": 8610.08,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1202.892
+          },
+          "coste_eur_t": {
+            "fv": 648.895,
+            "eolica": 179.757,
+            "pem": 1186.65,
+            "buffer_h2": 64.109,
+            "psa_hb": 429.392,
+            "bateria": 0.037,
+            "red_energia_omie": 75.122,
+            "red_peajes_cargos": 23.347,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.262
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.371,
+          "cf_hb": 0.842,
+          "cf_pem": 0.311,
+          "arranques_hb_ano": 0.4,
+          "h2_perdido_arranques_t_ano": 0.006,
+          "import_red_mwh_ano": 288.133,
+          "cuota_electricidad_renovable_contratada_horaria": 0.937,
+          "excedente_frac": 0.173,
+          "potencia_contratada_kw": 115.099
+        }
+      },
+      "red_spot_omie_no_verde": {
+        "diseno_optimo": {
+          "fv_kwp": 0.0,
+          "eol_kw": 0.0,
+          "ppa_fv_kw": 0.0,
+          "ppa_eol_kw": 0.0,
+          "pem_kw": 498.193,
+          "buffer_h": 3.723,
+          "bat_kwh": 0.0,
+          "carga_min_hb": 0.2,
+          "umbral_eur_mwh": 146.082,
+          "modo": 2.0,
+          "exporta": 0.0
+        },
+        "kpi": {
+          "lcoa_eur_t": 2009.198,
+          "nh3_t_ano": 351.249,
+          "costes_eur_ano": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 196092.215,
+            "buffer_h2": 3343.64,
+            "psa_hb": 158352.194,
+            "bateria": 0.0,
+            "red_energia_omie": 270256.069,
+            "red_peajes_cargos": 76531.131,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 1152.985
+          },
+          "coste_eur_t": {
+            "fv": 0.0,
+            "eolica": 0.0,
+            "pem": 558.272,
+            "buffer_h2": 9.519,
+            "psa_hb": 450.826,
+            "bateria": 0.0,
+            "red_energia_omie": 769.415,
+            "red_peajes_cargos": 217.883,
+            "ppa": 0.0,
+            "venta_excedentes": -0.0,
+            "agua": 3.283
+          },
+          "consumo_especifico_kwh_kg_nh3": 12.337,
+          "cf_hb": 0.802,
+          "cf_pem": 0.807,
+          "arranques_hb_ano": 38.605,
+          "h2_perdido_arranques_t_ano": 0.417,
+          "import_red_mwh_ano": 4338.496,
+          "cuota_electricidad_renovable_contratada_horaria": 0.0,
+          "excedente_frac": 0.0,
+          "potencia_contratada_kw": 613.292
+        }
+      }
+    },
+    "eolica_celda_tierra_red_aux": {
+      "lcoa_eur_t": 2575.363,
+      "diseno": {
+        "fv_kwp": 3116.355,
+        "eol_kw": 0.054,
+        "ppa_fv_kw": 0.0,
+        "ppa_eol_kw": 0.0,
+        "pem_kw": 1368.658,
+        "buffer_h": 26.388,
+        "bat_kwh": 0.814,
+        "carga_min_hb": 0.224,
+        "umbral_eur_mwh": -1000000000.0,
+        "modo": 1.0,
+        "exporta": 0.0
+      }
+    },
+    "amoniaco_gris": {
+      "supuestos": {
+        "gas_gj_t": {
+          "base": 33.0,
+          "min": 28.0,
+          "max": 38.0,
+          "unidad": "GJ/t NH3",
+          "fuente": "BAT ~28 GJ/t; media Europa ~36 MMBtu/t (~38 GJ/t) (Nitrogen Signal, CBAM cost stack)"
+        },
+        "ttf_eur_mwh": {
+          "base": 34.0,
+          "min": 25.0,
+          "max": 50.0,
+          "unidad": "EUR/MWh",
+          "fuente": "ACER/Energy-Charts: TTF media 2024 ~34 EUR/MWh; rango supuesto"
+        },
+        "co2_t_t": {
+          "base": 1.8,
+          "min": 1.7,
+          "max": 2.0,
+          "unidad": "t CO2/t NH3",
+          "fuente": "Hydrogen Europe Clean Ammonia 2023; DECHEMA: 1.7-2.0"
+        },
+        "eua_eur_t": {
+          "base": 65.0,
+          "min": 60.0,
+          "max": 90.0,
+          "unidad": "EUR/t CO2",
+          "fuente": "ESMA 2025: media spot EUA 2024 65 EUR/t; rango supuesto"
+        },
+        "referencias_mercado": [
+          "QCIntel 2024: coste implicito produccion Europa occidental medio 423 USD/t (2024)",
+          "Argus via Nitrogen Signal: 665 EUR/t excl. capex (abril 2026)",
+          "Haber-Bosch 2.0 EES 2026: amoniaco centralizado ~300 EUR/t historico, picos ~800 EUR/t"
+        ]
+      },
+      "gas_eur_t": 311.667,
+      "co2_eur_t_sin_asignacion_gratuita": 117.0,
+      "gas_p5_p95": [
+        254.565,
+        425.731
+      ],
+      "gas_mas_co2_p5_p95": [
+        382.534,
+        561.823
+      ],
+      "nota": "solo coste de gas y CO2 (sin capex ni otros opex); la asignacion gratuita ETS se reduce con CBAM 2026-2034"
+    }
+  },
+  "tareas": [
+    {
+      "id": "t1",
+      "tarea": "medicion de recurso eolico in situ o descartar eolica (aeropuerto, servidumbres aeronauticas, espacio)",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t2",
+      "tarea": "cotizaciones de proveedor para hb+psa modular de 1-2 t/d y pem 1-3 mw (capex, carga minima, arranque)",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t3",
+      "tarea": "cuantificar energia/h2 perdido por arranque y tiempo minimo de parada del lazo hb (ensayo e3)",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t4",
+      "tarea": "analisis regulatorio rfnbo (reglamento delegado ue 2023/1184): adicionalidad, correlacion temporal y geografica del ppa",
+      "estado": "pendiente"
+    },
+    {
+      "id": "t5",
+      "tarea": "anadir costes de personal, conexion a red, tanque nh3, terreno y permisos",
+      "estado": "pendiente"
+    }
+  ],
+  "riesgos": [
+    {
+      "riesgo": "recurso eolico pobre en el prat (era5 cf 6-13 %) y probable incompatibilidad con el aeropuerto",
+      "impacto": "alto",
+      "mitigacion": "fv + ppa; descartar eolica in situ salvo medicion"
+    },
+    {
+      "riesgo": "escala piloto: capex especifico de hb/psa/pem domina el lcoa y es muy incierto",
+      "impacto": "alto",
+      "mitigacion": "cotizaciones (t2); escalar a 20 t/d en fase siguiente"
+    },
+    {
+      "riesgo": "precio de red y peajes volatiles (2021-2022) afectan escenarios con red",
+      "impacto": "medio",
+      "mitigacion": "ppa a precio fijo; cobertura"
+    },
+    {
+      "riesgo": "penalizacion por arranque del hb sin dato experimental",
+      "impacto": "medio",
+      "mitigacion": "t3"
+    },
+    {
+      "riesgo": "cumplimiento rfnbo del escenario ppa no verificado; red spot no es verde",
+      "impacto": "medio",
+      "mitigacion": "t4"
+    }
+  ],
+  "decisiones": [
+    {
+      "decision": "hb fijo 50 kg/h nh3 (como v1); se optimizan generacion, pem, buffer, bateria y carga minima",
+      "tipo": "supuesto_de_diseno",
+      "estado": "provisional"
+    },
+    {
+      "decision": "carga minima hb acotada a 20-60 % (literatura); 10 % solo en barrido",
+      "tipo": "supuesto_de_modelo",
+      "estado": "provisional"
+    },
+    {
+      "decision": "penalizacion de arranque = h2 consumido sin producir nh3 durante h_perdidas_arranque_hb a carga minima + parada minima",
+      "tipo": "supuesto_de_modelo",
+      "estado": "provisional"
+    },
+    {
+      "decision": "v1 conservada en v1/",
+      "tipo": "gestion",
+      "estado": "hecho"
+    }
+  ],
+  "proximo_paso": "obtener cotizaciones de hb/psa/pem (t2) y decidir entre fv in situ con bateria/red o ppa; con esas cifras re-optimizar y definir el ensayo e3 de arranque y carga minima del hb"
+}

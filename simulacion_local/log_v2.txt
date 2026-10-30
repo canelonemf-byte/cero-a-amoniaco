@@ -1,0 +1,317 @@
+aislado_fv_eol_bat 2751.3 {'fv_kwp': 3103.354, 'eol_kw': 396.16, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1294.242, 'buffer_h': 25.594, 'bat_kwh': 1614.284, 'carga_min_hb': 0.213, 'umbral_eur_mwh': -1000000000.0, 'modo': 0.0, 'exporta': 0.0} 4
+aislado_solo_fv_bat 2767.0 {'fv_kwp': 3401.324, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1269.603, 'buffer_h': 24.93, 'bat_kwh': 1763.446, 'carga_min_hb': 0.222, 'umbral_eur_mwh': -1000000000.0, 'modo': 0.0, 'exporta': 0.0} 8
+red_auxiliares_fv_eol 2575.3 {'fv_kwp': 3126.457, 'eol_kw': 0.107, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1373.055, 'buffer_h': 26.385, 'bat_kwh': 0.627, 'carga_min_hb': 0.228, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0} 11
+ppa_fv_eol_red 1848.5 {'fv_kwp': 0.0, 'eol_kw': 0.0, 'ppa_fv_kw': 1033.065, 'ppa_eol_kw': 2794.564, 'pem_kw': 503.339, 'buffer_h': 1.676, 'bat_kwh': 0.0, 'carga_min_hb': 0.2, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0} 13
+red_spot_omie_no_verde 1821.0 {'fv_kwp': 0.0, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 498.939, 'buffer_h': 3.823, 'bat_kwh': 0.0, 'carga_min_hb': 0.201, 'umbral_eur_mwh': 135.978, 'modo': 2.0, 'exporta': 0.0} 15
+reciente red_auxiliares_fv_eol 2610.6
+reciente red_spot_omie_no_verde 2009.2
+insitu red_auxiliares_fv_eol buf [(0, 7628.079, 375.757), (6, 3827.804, 34.524), (12, 3138.58, 10.007), (24, 2584.304, 1.001), (48, 2617.832, 0.5), (72, 2677.762, 0.5), (96, 2737.693, 0.5), (120, 2797.623, 0.5)] cm [(0.1, 2576.031, 0.5), (0.2, 2575.517, 0.5), (0.3, 2576.873, 3.002), (0.4, 2585.055, 12.509), (0.5, 2601.815, 26.018), (0.6, 2630.224, 44.53), (0.8, 2731.426, 90.562)] pen [(0, 2575.093), (2, 2575.175), (6, 2575.339), (12, 2575.585), (24, 2576.078)] par [(1, 2575.339, 0.5), (6, 2575.339, 0.5), (24, 2575.339, 0.5), (72, 2575.339, 0.5)]
+{
+ "aislado_fv_eol_bat": {
+  "lcoa": 2751.29,
+  "hist": 2763.9178175231796,
+  "venta": 0.0,
+  "dis": {
+   "fv_kwp": 3103.354,
+   "eol_kw": 396.16,
+   "ppa_fv_kw": 0.0,
+   "ppa_eol_kw": 0.0,
+   "pem_kw": 1294.242,
+   "buffer_h": 25.594,
+   "bat_kwh": 1614.284,
+   "carga_min_hb": 0.213,
+   "umbral_eur_mwh": -1000000000.0,
+   "modo": 0.0,
+   "exporta": 0.0
+  },
+  "exc": 0.151,
+  "cfpem": 0.322,
+  "mc": {
+   "p5": 2629.616,
+   "p50": 3161.286,
+   "p95": 4419.968
+  },
+  "nh3": 365.464,
+  "kwh": 12.387,
+  "arr": 9.006,
+  "anos": {
+   "2019": 2697.229,
+   "2020": 2770.496,
+   "2021": 2859.855,
+   "2022": 2824.799,
+   "2023": 2683.48
+  },
+  "p24": 0.0,
+  "p25": 0.0,
+  "cuota": 1.0,
+  "desglose": {
+   "fv": 684.829,
+   "eolica": 173.585,
+   "pem": 1155.271,
+   "buffer_h2": 62.889,
+   "psa_hb": 433.29,
+   "bateria": 238.159,
+   "red_energia_omie": 0.0,
+   "red_peajes_cargos": 0.0,
+   "ppa": 0.0,
+   "venta_excedentes": -0.0,
+   "agua": 3.267
+  },
+  "imp": {
+   "e_lazo_hb_kwh_kg_nh3": 0.615,
+   "wacc": 0.366,
+   "capex_pem_eur_kw": 0.365,
+   "capex_hb_eur": 0.165,
+   "capex_fv_eur_kwp": 0.161,
+   "om_pem_frac": 0.141,
+   "capex_bat_eur_kwh": 0.122,
+   "e_electrolizador_kwh_kg_h2": 0.118
+  }
+ },
+ "aislado_solo_fv_bat": {
+  "lcoa": 2766.994,
+  "hist": 2800.5149658184355,
+  "venta": 0.0,
+  "dis": {
+   "fv_kwp": 3401.324,
+   "eol_kw": 0.0,
+   "ppa_fv_kw": 0.0,
+   "ppa_eol_kw": 0.0,
+   "pem_kw": 1269.603,
+   "buffer_h": 24.93,
+   "bat_kwh": 1763.446,
+   "carga_min_hb": 0.222,
+   "umbral_eur_mwh": -1000000000.0,
+   "modo": 0.0,
+   "exporta": 0.0
+  },
+  "exc": 0.18,
+  "cfpem": 0.315,
+  "mc": {
+   "p5": 2637.147,
+   "p50": 3252.007,
+   "p95": 5352.592
+  },
+  "nh3": 348.465,
+  "kwh": 12.454,
+  "arr": 43.53,
+  "anos": {
+   "2019": 2751.569,
+   "2020": 2826.172,
+   "2021": 2900.294,
+   "2022": 2839.639,
+   "2023": 2699.903
+  },
+  "p24": 0.0,
+  "p25": 0.0,
+  "cuota": 1.0,
+  "desglose": {
+   "fv": 787.2,
+   "eolica": 0.0,
+   "pem": 1184.977,
+   "buffer_h2": 64.245,
+   "psa_hb": 454.428,
+   "bateria": 272.857,
+   "red_energia_omie": 0.0,
+   "red_peajes_cargos": 0.0,
+   "ppa": 0.0,
+   "venta_excedentes": -0.0,
+   "agua": 3.287
+  },
+  "imp": {
+   "e_lazo_hb_kwh_kg_nh3": 0.718,
+   "capex_pem_eur_kw": 0.318,
+   "wacc": 0.272,
+   "capex_bat_eur_kwh": 0.137,
+   "capex_fv_eur_kwp": 0.133,
+   "capex_hb_eur": 0.122,
+   "carga_min_electrolizador": 0.12,
+   "om_pem_frac": 0.116
+  }
+ },
+ "red_auxiliares_fv_eol": {
+  "lcoa": 2575.339,
+  "hist": 2612.702376872159,
+  "venta": 2498.38,
+  "dis": {
+   "fv_kwp": 3126.457,
+   "eol_kw": 0.107,
+   "ppa_fv_kw": 0.0,
+   "ppa_eol_kw": 0.0,
+   "pem_kw": 1373.055,
+   "buffer_h": 26.385,
+   "bat_kwh": 0.627,
+   "carga_min_hb": 0.228,
+   "umbral_eur_mwh": -1000000000.0,
+   "modo": 1.0,
+   "exporta": 0.0
+  },
+  "exc": 0.188,
+  "cfpem": 0.297,
+  "mc": {
+   "p5": 2391.441,
+   "p50": 2811.994,
+   "p95": 3301.885
+  },
+  "nh3": 357.8,
+  "kwh": 12.38,
+  "arr": 0.5,
+  "anos": {
+   "2019": 2504.9,
+   "2020": 2566.527,
+   "2021": 2722.792,
+   "2022": 2752.001,
+   "2023": 2537.147
+  },
+  "p24": 2637.405,
+  "p25": 2518.583,
+  "cuota": 0.908,
+  "desglose": {
+   "fv": 704.706,
+   "eolica": 0.048,
+   "pem": 1238.435,
+   "buffer_h2": 66.22,
+   "psa_hb": 442.572,
+   "bateria": 0.094,
+   "red_energia_omie": 92.891,
+   "red_peajes_cargos": 27.11,
+   "ppa": 0.0,
+   "venta_excedentes": -0.0,
+   "agua": 3.262
+  },
+  "imp": {
+   "wacc": 0.579,
+   "capex_pem_eur_kw": 0.485,
+   "e_electrolizador_kwh_kg_h2": 0.422,
+   "capex_hb_eur": 0.283,
+   "om_pem_frac": 0.241,
+   "capex_fv_eur_kwp": 0.216,
+   "e_lazo_hb_kwh_kg_nh3": 0.139,
+   "frac_stack_capex": 0.093
+  }
+ },
+ "ppa_fv_eol_red": {
+  "lcoa": 1848.504,
+  "hist": "",
+  "venta": 0.0,
+  "dis": {
+   "fv_kwp": 0.0,
+   "eol_kw": 0.0,
+   "ppa_fv_kw": 1033.065,
+   "ppa_eol_kw": 2794.564,
+   "pem_kw": 503.339,
+   "buffer_h": 1.676,
+   "bat_kwh": 0.0,
+   "carga_min_hb": 0.2,
+   "umbral_eur_mwh": -1000000000.0,
+   "modo": 1.0,
+   "exporta": 0.0
+  },
+  "exc": 0.301,
+  "cfpem": 0.881,
+  "mc": {
+   "p5": 1750.065,
+   "p50": 1996.804,
+   "p95": 2280.52
+  },
+  "nh3": 389.425,
+  "kwh": 12.274,
+  "arr": 3.502,
+  "anos": {},
+  "p24": 1862.847,
+  "p25": 1833.264,
+  "cuota": 1.0,
+  "desglose": {
+   "fv": 0.0,
+   "eolica": 0.0,
+   "pem": 521.896,
+   "buffer_h2": 3.864,
+   "psa_hb": 406.63,
+   "bateria": 0.0,
+   "red_energia_omie": 0.0,
+   "red_peajes_cargos": 215.674,
+   "ppa": 846.336,
+   "venta_excedentes": -149.159,
+   "agua": 3.263
+  },
+  "imp": {
+   "e_electrolizador_kwh_kg_h2": 0.556,
+   "capex_hb_eur": 0.449,
+   "wacc": 0.362,
+   "capex_pem_eur_kw": 0.337,
+   "om_pem_frac": 0.228,
+   "ppa_eol_eur_mwh": 0.201,
+   "e_lazo_hb_kwh_kg_nh3": 0.174,
+   "vida_stack_h": -0.138
+  }
+ },
+ "red_spot_omie_no_verde": {
+  "lcoa": 1820.994,
+  "hist": 2013.024071090277,
+  "venta": 0.0,
+  "dis": {
+   "fv_kwp": 0.0,
+   "eol_kw": 0.0,
+   "ppa_fv_kw": 0.0,
+   "ppa_eol_kw": 0.0,
+   "pem_kw": 498.939,
+   "buffer_h": 3.823,
+   "bat_kwh": 0.0,
+   "carga_min_hb": 0.201,
+   "umbral_eur_mwh": 135.978,
+   "modo": 2.0,
+   "exporta": 0.0
+  },
+  "exc": 0.0,
+  "cfpem": 0.942,
+  "mc": {
+   "p5": 1720.95,
+   "p50": 1964.126,
+   "p95": 2232.221
+  },
+  "nh3": 411.809,
+  "kwh": 12.308,
+  "arr": 25.017,
+  "anos": {
+   "2019": 1636.932,
+   "2020": 1469.613,
+   "2021": 2258.547,
+   "2022": 4285.862,
+   "2023": 2133.513
+  },
+  "p24": 1808.2,
+  "p25": 1833.036,
+  "cuota": 0.0,
+  "desglose": {
+   "fv": 0.0,
+   "eolica": 0.0,
+   "pem": 499.596,
+   "buffer_h2": 8.336,
+   "psa_hb": 384.528,
+   "bateria": 0.0,
+   "red_energia_omie": 726.622,
+   "red_peajes_cargos": 198.639,
+   "ppa": 0.0,
+   "venta_excedentes": -0.0,
+   "agua": 3.273
+  },
+  "imp": {
+   "e_electrolizador_kwh_kg_h2": 0.576,
+   "capex_hb_eur": 0.445,
+   "wacc": 0.361,
+   "capex_pem_eur_kw": 0.348,
+   "om_pem_frac": 0.228,
+   "e_lazo_hb_kwh_kg_nh3": 0.207,
+   "vida_stack_h": -0.126,
+   "frac_stack_capex": 0.118
+  }
+ }
+}
+mejor ppa_fv_eol_red tornado {'e_electrolizador_kwh_kg_h2': (1764.211, 2154.464), 'capex_hb_eur': (1739.898, 2107.239), 'capex_pem_eur_kw': (1731.343, 2018.322), 'wacc': (1760.371, 1992.17), 'e_lazo_hb_kwh_kg_nh3': (1750.24, 1972.895), 'ppa_eol_eur_mwh': (1756.702, 1929.98), 'om_hb_psa_frac': (1815.814, 1913.882), 'vida_stack_h': (1848.504, 1773.675), 'frac_stack_capex': (1825.936, 1893.639), 'om_pem_frac': (1819.248, 1877.76)}
+tierra 2575.363 {'fv_kwp': 3116.355, 'eol_kw': 0.054, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1368.658, 'buffer_h': 26.388, 'bat_kwh': 0.814, 'carga_min_hb': 0.224, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0}
+gris {'gas_eur_t': 311.66666666666663, 'co2_eur_t_exposicion_total': 117.0, 'gas_mas_co2_p5_p95': [382.53434688932043, 561.8226360234892], 'gas_p5_p95': [254.56489247679963, 425.7314548597164]}
+buf [(0, 1862.598, 12.509), (6, 1856.766, 1.001), (12, 1870.44, 0.5), (24, 1898.075, 0.5), (48, 1953.344, 0.5), (72, 2008.614, 0.5), (96, 2063.884, 0.5), (120, 2119.154, 0.5)]
+cm [(0.1, 1847.468, 0.5), (0.2, 1848.503, 3.502), (0.3, 1856.027, 13.009), (0.4, 1877.038, 36.025), (0.5, 1905.925, 62.042), (0.6, 1961.267, 99.568), (0.8, 2116.736, 182.125)]
+pen [(0, 1847.506), (2, 1847.839), (6, 1848.504), (12, 1849.502), (24, 1851.502)]
+interanual {'2014': 2632.371, '2015': 2567.548, '2016': 2640.551, '2017': 2561.246, '2018': 2650.495, '2019': 2535.766, '2020': 2615.867, '2021': 2679.395, '2022': 2637.405, '2023': 2506.532}
+t 40.57269644737244

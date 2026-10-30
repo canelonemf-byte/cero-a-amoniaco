@@ -1,0 +1,19 @@
+ppa_red_mensual 3165.9 {'fv_kwp': 0.0, 'eol_kw': 0.0, 'ppa_fv_kw': 1208.255, 'ppa_eol_kw': 3666.695, 'pem_kw': 537.073, 'buffer_h': 14.001, 'bat_kwh': 0.0, 'carga_min_hb': 0.292, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0, 'fv_suelo': 1.0} 1.0 6
+ppa_rfnbo_horario 3165.8 {'fv_kwp': 0.0, 'eol_kw': 0.0, 'ppa_fv_kw': 1187.493, 'ppa_eol_kw': 3662.419, 'pem_kw': 538.796, 'buffer_h': 14.134, 'bat_kwh': 0.041, 'carga_min_hb': 0.3, 'umbral_eur_mwh': -1000000000.0, 'modo': 3.0, 'exporta': 0.0, 'fv_suelo': 1.0} 1.0 15
+fv_in_situ_suelo_red_aux 19129.0 {'fv_kwp': 2571.773, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1782.155, 'buffer_h': 62.443, 'bat_kwh': 6.525, 'carga_min_hb': 0.327, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0, 'fv_suelo': 1.0} 0.906 21
+fv_cubierta_red_aux 4114.2 {'fv_kwp': 3672.304, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1500.709, 'buffer_h': 36.825, 'bat_kwh': 0.862, 'carga_min_hb': 0.369, 'umbral_eur_mwh': -1000000000.0, 'modo': 1.0, 'exporta': 0.0, 'fv_suelo': 0.0} 0.905 27
+aislado_fv_cubierta_bat 4338.2 {'fv_kwp': 3889.506, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 1353.22, 'buffer_h': 30.441, 'bat_kwh': 1893.796, 'carga_min_hb': 0.206, 'umbral_eur_mwh': -1000000000.0, 'modo': 0.0, 'exporta': 0.0, 'fv_suelo': 0.0} 1.0 35
+red_spot_omie_no_verde 3052.3 {'fv_kwp': 0.0, 'eol_kw': 0.0, 'ppa_fv_kw': 0.0, 'ppa_eol_kw': 0.0, 'pem_kw': 498.277, 'buffer_h': 1.012, 'bat_kwh': 0.0, 'carga_min_hb': 0.202, 'umbral_eur_mwh': 199.274, 'modo': 2.0, 'exporta': 0.0, 'fv_suelo': 1.0} 0.0 38
+mc ppa_red_mensual {'p5': 3016.988, 'p50': 3431.798, 'p95': 3923.688} {'o2': 3036.368, 'pioneros': 3047.387, 'h2bank': 3064.944, 'todo': 2816.987}
+mc ppa_rfnbo_horario {'p5': 3017.897, 'p50': 3431.272, 'p95': 3923.325} {'o2': 3036.346, 'pioneros': 3046.955, 'h2bank': 3064.922, 'todo': 2816.555}
+mc fv_in_situ_suelo_red_aux {'p5': 14887.802, 'p50': 18499.815, 'p95': 22284.015} {'o2': 18999.478, 'pioneros': 18652.852, 'h2bank': 19037.517, 'todo': 18431.885}
+mc fv_cubierta_red_aux {'p5': 3871.265, 'p50': 4504.137, 'p95': 5141.857} {'o2': 3984.675, 'pioneros': 3755.623, 'h2bank': 4022.873, 'todo': 3534.719}
+mc aislado_fv_cubierta_bat {'p5': 4153.077, 'p50': 4992.137, 'p95': 8022.654} {'o2': 4207.768, 'pioneros': 4004.007, 'h2bank': 4236.544, 'todo': 3771.988}
+mc red_spot_omie_no_verde {'p5': 2917.857, 'p50': 3347.057, 'p95': 3832.605} {'o2': 2922.814, 'pioneros': 2954.193, 'h2bank': 3052.32, 'todo': 2824.687}
+mcR ppa_red_mensual {'n': 64.0, 'p5': 2960.029, 'p50': 3346.06, 'p95': 3701.475}
+mcR ppa_rfnbo_horario {'n': 64.0, 'p5': 2960.167, 'p50': 3346.686, 'p95': 3701.575}
+mcR fv_in_situ_suelo_red_aux {'n': 64.0, 'p5': 15229.241, 'p50': 18147.333, 'p95': 22308.391}
+mcR fv_cubierta_red_aux {'n': 64.0, 'p5': 3922.862, 'p50': 4355.693, 'p95': 4981.272}
+mcR aislado_fv_cubierta_bat {'n': 64.0, 'p5': 4112.761, 'p50': 4556.811, 'p95': 5231.196}
+mcR red_spot_omie_no_verde {'n': 64.0, 'p5': 2849.897, 'p50': 3219.361, 'p95': 3569.798}
+t 223.5354266166687
